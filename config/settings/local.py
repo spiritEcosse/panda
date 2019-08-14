@@ -60,3 +60,26 @@ INSTALLED_APPS += ["django_extensions"]  # noqa F405
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+# Haystack settings
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': APPS_DIR('whoosh_index'),
+    },
+}
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+#     },
+# }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': 'http://solr:8983/solr/panda',
+        'INCLUDE_SPELLING': True,
+        # 'EXCLUDED_INDEXES': ['oscar.catalogue.search_indexes.ProductIndex'],
+    },
+}

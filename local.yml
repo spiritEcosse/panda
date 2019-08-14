@@ -3,6 +3,7 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  local_solr_data: {}
 
 services:
   django: &django
@@ -10,23 +11,30 @@ services:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     image: panda_local_django
+    restart: on-failure
     depends_on:
       - postgres
       - mailhog
+      - solr
     volumes:
       - .:/app
+      - ~/.ipython:/root/.ipython
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     ports:
       - "8000:8000"
     command: /start
+    environment:
+      DJANGO_SETTINGS_MODULE: "config.settings.local"
 
   postgres:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: panda_production_postgres
+    ports:
+      - 5435:5432
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
@@ -84,3 +92,31 @@ services:
       - "3000:3000"
       # Expose browsersync UI: https://www.browsersync.io/docs/options/#option-ui
       - "3001:3001"
+
+  solr:
+    build:
+      context: .
+      dockerfile: ./compose/local/solr/Dockerfile
+    image: panda_local_solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - local_solr_data:/var/solr
+      - ./schema.xml:/opt/solr/example/solr/panda/conf/schema.xml
+    env_file:
+      - ./.envs/.local/.django
+    command:
+      - solr-precreate
+      - gettingstarted
+
+  initial-data:
+    image: oscarcommerce/django-oscar-sandbox
+    volumes:
+      - ./panda/media:/app/sandbox/public/media/
+    user: root
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: bash -c "cd /app && make sandbox"
+    depends_on:
+      - postgres

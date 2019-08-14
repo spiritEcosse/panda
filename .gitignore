@@ -4,6 +4,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Search index - auto generating.
+whoosh_index
+
+# Static files compressed.
+*.min.*
+
 # C extensions
 *.so
 

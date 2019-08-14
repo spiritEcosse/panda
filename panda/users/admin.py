@@ -7,7 +7,7 @@ from panda.users.forms import UserChangeForm, UserCreationForm
 User = get_user_model()
 
 
-@admin.register(User)
+# @admin.register(User)
 class UserAdmin(auth_admin.UserAdmin):
 
     form = UserChangeForm

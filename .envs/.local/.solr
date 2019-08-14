@@ -1,0 +1,4 @@
+# Solr Engine
+# ------------------------------------------------------------------------------
+LOCAL_SOLR_SCHEMA=config/solr/schema.xml
+SOLR_SCHEMA=/opt/solr/example/solr/collection1/conf/schema.xml
