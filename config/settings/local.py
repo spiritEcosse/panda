@@ -64,12 +64,6 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # ------------------------------------------------------------------------------
 
 # Haystack settings
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-#         'PATH': APPS_DIR('whoosh_index'),
-#     },
-# }
 
 # HAYSTACK_CONNECTIONS = {
 #     'default': {
@@ -85,14 +79,6 @@ CELERY_TASK_EAGER_PROPAGATES = True
 #     },
 # }
 
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
-#         'URL': 'http://127.0.0.1:9200/',
-#         'INDEX_NAME': 'haystack',
-#     },
-# }
-
 ES_URL = urlparse(os.environ.get('BONSAI_URL'))
 
 HAYSTACK_CONNECTIONS = {
@@ -102,3 +88,10 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'haystack',
     },
 }
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+#         'PATH': APPS_DIR('whoosh_index'),
+#     },
+# }
