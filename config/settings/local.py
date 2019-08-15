@@ -1,5 +1,7 @@
 from .base import *  # noqa
 from .base import env
+from urllib.parse import urlparse
+import os
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -62,12 +64,12 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # ------------------------------------------------------------------------------
 
 # Haystack settings
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': APPS_DIR('whoosh_index'),
-    },
-}
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+#         'PATH': APPS_DIR('whoosh_index'),
+#     },
+# }
 
 # HAYSTACK_CONNECTIONS = {
 #     'default': {
@@ -91,3 +93,12 @@ HAYSTACK_CONNECTIONS = {
 #     },
 # }
 
+ES_URL = urlparse(os.environ.get('BONSAI_URL'))
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
+        'URL': ES_URL.scheme + '://' + ES_URL.hostname + ':9200',
+        'INDEX_NAME': 'haystack',
+    },
+}

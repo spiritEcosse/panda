@@ -15,6 +15,9 @@ migrate:
 shell:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py shell
 
+pytest:
+	docker-compose -f ${COMPOSE_FILE} exec django pytest
+
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
 
@@ -49,6 +52,15 @@ initial-data_logs:
 django_stop_rm:
 	docker-compose -f ${COMPOSE_FILE} stop django
 	docker-compose -f ${COMPOSE_FILE} rm -f django
+
+django-logs:
+	docker-compose -f ${COMPOSE_FILE} logs django
+
+kibana-logs:
+	docker-compose -f ${COMPOSE_FILE} logs kibana
+
+elasticsearch_logs:
+	docker-compose -f ${COMPOSE_FILE} logs elasticsearch
 
 django_reupd: django_stop_rm
 	docker-compose -f ${COMPOSE_FILE} up -d django
@@ -86,6 +98,9 @@ create_superuser:
 
 ipython:
 	docker-compose -f ${COMPOSE_FILE} exec django ipython
+
+ipython_run:
+	docker-compose -f ${COMPOSE_FILE} run --rm django ipython
 
 bash:
 	docker-compose -f ${COMPOSE_FILE} exec django bash

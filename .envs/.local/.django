@@ -16,3 +16,6 @@ CELERY_FLOWER_PASSWORD=ji60rGBkJVjTuUyqbDmcRJChWac3ONBLog8ffJchAeWDpCjcsr7hAurRg
 # Databases for initial-data.
 DATABASE_ENGINE=django.db.backends.postgresql
 DATABASE_HOST=postgres
+
+# Haystack connections
+BONSAI_URL=http://elasticsearch:9200/
