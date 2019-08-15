@@ -75,11 +75,19 @@ HAYSTACK_CONNECTIONS = {
 #     },
 # }
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
-        'URL': 'http://solr:8983/solr/panda',
-        'INCLUDE_SPELLING': True,
-        # 'EXCLUDED_INDEXES': ['oscar.catalogue.search_indexes.ProductIndex'],
-    },
-}
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+#         'URL': 'http://solr:8983/solr/panda',
+#         'INCLUDE_SPELLING': True,
+#     },
+# }
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
+#         'URL': 'http://127.0.0.1:9200/',
+#         'INDEX_NAME': 'haystack',
+#     },
+# }
+
