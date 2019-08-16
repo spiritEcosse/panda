@@ -27,4 +27,3 @@ coreapi==2.3.3  # https://github.com/core-api/python-client
 django-oscar==2.0.0 # https://github.com/django-oscar/django-oscar
 sorl-thumbnail==12.5.0 # https://pypi.org/project/sorl-thumbnail/
 elasticsearch>=2.0.0,<3.0.0 # https://pypi.org/project/elasticsearch/
-django-haystack==2.8.1 # https://django-haystack.readthedocs.io/en/v2.8.1/
