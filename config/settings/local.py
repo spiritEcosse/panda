@@ -1,6 +1,5 @@
 from .base import *  # noqa
 from .base import env
-from urllib.parse import urlparse
 import os
 
 # GENERAL

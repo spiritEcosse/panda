@@ -3,6 +3,8 @@ Base settings to build other settings files upon.
 """
 
 import environ
+from urllib.parse import urlparse
+import os
 from oscar.defaults import *
 
 ROOT_DIR = (
