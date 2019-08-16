@@ -7,7 +7,6 @@ __pycache__/
 # Search index - auto generating.
 whoosh_index
 solr*
-schema.xml
 
 # Static files compressed.
 *.min.*
