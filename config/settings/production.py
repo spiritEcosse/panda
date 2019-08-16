@@ -221,3 +221,13 @@ sentry_sdk.init(
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+ES_URL = urlparse(os.environ.get('BONSAI_URL'))
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
+        'URL': ES_URL.scheme + '://' + ES_URL.hostname + ':9200',
+        'INDEX_NAME': 'haystack',
+    },
+}
