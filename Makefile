@@ -103,7 +103,10 @@ ipython_run:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ipython
 
 bash:
-	docker-compose -f ${COMPOSE_FILE} exec django bash
+	docker-compose -f ${COMPOSE_FILE} exec django sh
+
+sh:
+	docker-compose -f ${COMPOSE_FILE} exec django sh
 
 rebuild_index:
 	docker-compose -f ${COMPOSE_FILE} run --rm django python manage.py rebuild_index --noinput
@@ -113,6 +116,15 @@ update_index:
 
 
 # Solr
+# locally
+
+solr-install:
+	wget http://archive.apache.org/dist/lucene/solr/4.7.2/solr-4.7.2.tgz
+	tar xzf solr-4.7.2.tgz
+	./manage.py build_solr_schema > solr-4.7.2/example/solr/collection1/conf/schema.xml
+	cd solr-4.7.2/example
+	java -jar start.jar
+
 rm_volume_solr:
 	docker volume rm -f panda_local_solr_data
 
@@ -131,6 +143,6 @@ solr-reupd: solr_stop_rm
 solr-create-collection: solr_stop_rm rm_volume_solr
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose up -d --build solr && docker-compose exec solr solr create -c panda
 
-build_solr_schema: solr-create-collection
+build_solr_schema:
 	rm -fr schema.xml
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose build django && docker-compose run --rm django python manage.py build_solr_schema > schema.xml

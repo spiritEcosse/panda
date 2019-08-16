@@ -28,3 +28,5 @@ django-extensions==2.2.1  # https://github.com/django-extensions/django-extensio
 django-coverage-plugin==1.6.0  # https://github.com/nedbat/django_coverage_plugin
 pytest-django==3.5.1  # https://github.com/pytest-dev/pytest-django
 elasticsearch>=2.0.0,<3.0.0 # https://pypi.org/project/elasticsearch/
+Whoosh==2.7.4 # https://pypi.org/project/Whoosh/
+pysolr==3.8.1 # https://pypi.org/project/pysolr/

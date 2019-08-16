@@ -73,8 +73,15 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # HAYSTACK_CONNECTIONS = {
 #     'default': {
+#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+#         'PATH': APPS_DIR('whoosh_index'),
+#     },
+# }
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
 #         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
-#         'URL': 'http://solr:8983/solr/panda',
+#         'URL': 'http://solr:8983/solr',
 #         'INCLUDE_SPELLING': True,
 #     },
 # }
@@ -88,10 +95,3 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'haystack',
     },
 }
-
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-#         'PATH': APPS_DIR('whoosh_index'),
-#     },
-# }

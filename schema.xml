@@ -1,15 +1,4 @@
-PostgreSQL is available
-System check identified some issues:
-
-WARNINGS:
-[33;1m?: (urls.W005) URL namespace 'admin' isn't unique. You may not be able to reverse all URLs in this namespace[0m
-[31;1m
-[0m[31;1m
-[0m[31;1m
-[0m[31;1mSave the following output to 'schema.xml' and place it in your Solr configuration directory.
-[0m[31;1m--------------------------------------------------------------------------------------------
-[0m[31;1m
-[0m<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with

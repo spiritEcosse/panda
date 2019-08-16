@@ -26,4 +26,3 @@ coreapi==2.3.3  # https://github.com/core-api/python-client
 # Django oscar
 django-oscar==2.0.0 # https://github.com/django-oscar/django-oscar
 sorl-thumbnail==12.5.0 # https://pypi.org/project/sorl-thumbnail/
-Whoosh==2.7.4 # https://pypi.org/project/Whoosh/
