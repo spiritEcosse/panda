@@ -4,7 +4,7 @@ COMPOSE_FILE?=local.yml
 PORT_DB?=5432
 
 makemessages:
-	docker-compose exec django ./manage.py makemessages -a
+	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py makemessages -a
 
 compilemessages:
 	docker-compose exec django ./manage.py compilemessages
@@ -76,7 +76,7 @@ install: initial-data deploy_build
 #install: initial-data deploy
 
 collectstatic:
-	docker-compose exec django ./manage.py collectstatic --noinput
+	docker-compose -f ${COMPOSE_FILE} run --rm django ./manage.py collectstatic --noinput
 
 freeze:
 	docker-compose -f ${COMPOSE_FILE} exec django pip freeze
