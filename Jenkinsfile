@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage("Check build by docker-compose") {
             steps {
-                docker-compose -f production.yml up
+                make deploy_production
             }
         }
         stage("Deploy to production") {
