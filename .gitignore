@@ -336,5 +336,5 @@ panda/media/
 
 .ipython/
 .env
-.envs/*
-!.envs/.local/
+#.envs/*
+#!.envs/.local/
