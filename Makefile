@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 PORT_WEB?=8000
 COMPOSE_FILE?=local.yml
-COMPOSE_FILE_PRODUCTION?=production.yml
 PORT_DB?=5432
 
 makemessages:
@@ -33,9 +32,6 @@ rm_hard: stop_rm rm_volumes
 
 deploy:
 	docker-compose -f ${COMPOSE_FILE} up --scale initial-data=0
-
-deploy_production:
-	docker-compose -f ${COMPOSE_FILE_PRODUCTION} up
 
 deploy_build:
 	docker-compose -f ${COMPOSE_FILE} up --build --scale initial-data=0
