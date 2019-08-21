@@ -10,12 +10,12 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     }
     stages {
-        stage("First step") {
+        stage("Check build by docker-compose") {
             steps {
-                sh 'ssh igor@panda_production \'hostname\''
+                docker-compose -f production.yml up
             }
         }
-        stage("Second step") {
+        stage("Deploy to production") {
             steps {
                 sh 'ssh igor@panda_production \'uptime\''
             }

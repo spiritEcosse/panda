@@ -62,11 +62,30 @@ services:
     ports:
       - "5555:5555"
     command: /start-flower
-  awscli:
-    build:
-      context: .
-      dockerfile: ./compose/production/aws/Dockerfile
-    env_file:
-      - ./.envs/.production/.django
+
+#  awscli:
+#    build:
+#      context: .
+#      dockerfile: ./compose/production/aws/Dockerfile
+#    env_file:
+#      - ./.envs/.production/.django
+#    volumes:
+#      - production_postgres_data_backups:/backups
+
+  elasticsearch:
+    image: elasticsearch:2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  initial-data:
+    image: oscarcommerce/django-oscar-sandbox
     volumes:
-      - production_postgres_data_backups:/backups
+      - ./panda/media:/app/sandbox/public/media/
+    user: root
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: bash -c "cd /app && make sandbox"
+    depends_on:
+      - postgres
