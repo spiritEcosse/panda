@@ -60,7 +60,7 @@ services:
     <<: *django
     image: panda_production_flower
     ports:
-      - "5555:5555"
+      - "5554:5555"
     command: /start-flower
 
 #  awscli:
@@ -77,15 +77,3 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-
-  initial-data:
-    image: oscarcommerce/django-oscar-sandbox
-    volumes:
-      - ./panda/media:/app/sandbox/public/media/
-    user: root
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    command: bash -c "cd /app && make sandbox"
-    depends_on:
-      - postgres

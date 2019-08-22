@@ -72,7 +72,7 @@ services:
     <<: *django
     image: panda_local_flower
     ports:
-      - "5555:5555"
+      - "5554:5555"
     command: /start-flower
 
   node:

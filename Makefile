@@ -18,6 +18,9 @@ shell:
 pytest:
 	docker-compose -f ${COMPOSE_FILE} exec django pytest
 
+tests:
+	docker-compose -f ${COMPOSE_FILE} run --rm django tests
+
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
 
@@ -73,7 +76,6 @@ initial_data_reupd: initial_data_stop_rm
 	docker-compose -f ${COMPOSE_FILE} up -d initial-data
 
 install: initial-data deploy_build
-#install: initial-data deploy
 
 collectstatic:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ./manage.py collectstatic --noinput
