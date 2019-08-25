@@ -8,4 +8,3 @@ pip install -r requirements.txt             &&
 python manage.py migrate                    &&
 python manage.py rebuild_index  --noinput   &&
 python manage.py collectstatic  --noinput
-
