@@ -3,6 +3,7 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  local_solr_data: {}
 
 services:
   django: &django
@@ -10,11 +11,15 @@ services:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     image: panda_local_django
+    restart: on-failure
     depends_on:
       - postgres
       - mailhog
+      - elasticsearch
+#      - solr
     volumes:
       - .:/app
+      - ~/.ipython:/root/.ipython
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
@@ -27,6 +32,8 @@ services:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: panda_production_postgres
+    ports:
+      - 5435:5432
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
@@ -65,7 +72,7 @@ services:
     <<: *django
     image: panda_local_flower
     ports:
-      - "5555:5555"
+      - "5554:5555"
     command: /start-flower
 
   node:
@@ -84,3 +91,36 @@ services:
       - "3000:3000"
       # Expose browsersync UI: https://www.browsersync.io/docs/options/#option-ui
       - "3001:3001"
+
+  elasticsearch:
+    image: elasticsearch:2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+#  kibana:
+#    image: kibana:7.3.0
+#    ports:
+#      - "5601:5601"
+#    links:
+#      - elasticsearch
+
+#  solr:
+#    image: yoshz/solr:4.7.2
+#    ports:
+#      - "8983:8983"
+#    volumes:
+#      - local_solr_data:/var/solr
+#      - ./schema.xml:/opt/solr/multicore/core0/conf/schema.xml
+
+  initial-data:
+    image: oscarcommerce/django-oscar-sandbox
+    volumes:
+      - ./panda/media:/app/sandbox/public/media/
+    user: root
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: bash -c "cd /app && make sandbox"
+    depends_on:
+      - postgres

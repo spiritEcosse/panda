@@ -3,7 +3,6 @@
 Werkzeug==0.14.1  # pyup: < 0.15 # https://github.com/pallets/werkzeug
 ipdb==0.12.2  # https://github.com/gotcha/ipdb
 Sphinx==2.1.2  # https://github.com/sphinx-doc/sphinx
-psycopg2==2.8.3 --no-binary psycopg2  # https://github.com/psycopg/psycopg2
 
 # Testing
 # ------------------------------------------------------------------------------
@@ -19,6 +18,11 @@ black==19.3b0  # https://github.com/ambv/black
 pylint-django==2.0.11  # https://github.com/PyCQA/pylint-django
 pylint-celery==0.3  # https://github.com/PyCQA/pylint-celery
 
+# Linting
+flake8-debugger==3.1.0
+flake8-blind-except==0.1.1
+isort==4.3.21
+
 # Django
 # ------------------------------------------------------------------------------
 factory-boy==2.12.0  # https://github.com/FactoryBoy/factory_boy
@@ -27,3 +31,10 @@ django-debug-toolbar==2.0  # https://github.com/jazzband/django-debug-toolbar
 django-extensions==2.2.1  # https://github.com/django-extensions/django-extensions
 django-coverage-plugin==1.6.0  # https://github.com/nedbat/django_coverage_plugin
 pytest-django==3.5.1  # https://github.com/pytest-dev/pytest-django
+Whoosh==2.7.4 # https://pypi.org/project/Whoosh/
+pysolr==3.8.1 # https://pypi.org/project/pysolr/
+
+# Sandbox
+requests==2.22.0
+uWSGI==2.0.18
+whitenoise==4.1.3

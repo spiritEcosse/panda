@@ -1,0 +1,98 @@
+version: '3'
+
+volumes:
+  postgres_data: {}
+  postgres_data_backups: {}
+  solr_data: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/test/django/Dockerfile
+    image: panda_test_django
+    restart: on-failure
+    depends_on:
+      - postgres
+      - mailhog
+      - elasticsearch
+    volumes:
+      - .:/app
+      - ~/.ipython:/root/.ipython
+    env_file:
+      - ./.envs/.test/.django
+      - ./.envs/.test/.postgres
+    ports:
+      - "8012:8000"
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: test_panda_postgres
+    ports:
+      - 5436:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.test/.postgres
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8023:8025"
+
+  redis:
+    image: redis:5.0
+
+  celeryworker:
+    <<: *django
+    image: panda_test_celeryworker
+    depends_on:
+      - redis
+      - postgres
+      - mailhog
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: panda_test_celerybeat
+    depends_on:
+      - redis
+      - postgres
+      - mailhog
+    ports: []
+    command: /start-celerybeat
+
+  flower:
+    <<: *django
+    image: panda_test_flower
+    ports:
+      - "5552:5555"
+    command: /start-flower
+
+  node:
+    build:
+      context: .
+      dockerfile: ./compose/test/node/Dockerfile
+    image: panda_test_node
+    depends_on:
+      - django
+    volumes:
+      - .:/app
+      # http://jdlm.info/articles/2016/03/06/lessons-building-node-app-docker.html
+      - /app/node_modules
+    command: npm run dev
+    ports:
+      - "3001:3000"
+      # Expose browsersync UI: https://www.browsersync.io/docs/options/#option-ui
+      - "3002:3001"
+
+  elasticsearch:
+    image: elasticsearch:2
+    ports:
+      - "9201:9200"
+      - "9301:9300"

@@ -4,6 +4,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Search index - auto generating.
+whoosh_index
+solr*
+
+# Static files compressed.
+*.min.*
+
 # C extensions
 *.so
 
@@ -329,5 +336,7 @@ panda/media/
 
 .ipython/
 .env
-.envs/*
-!.envs/.local/
+#.envs/*
+#!.envs/.local/
+src
+

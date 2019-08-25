@@ -60,13 +60,20 @@ services:
     <<: *django
     image: panda_production_flower
     ports:
-      - "5555:5555"
+      - "5554:5555"
     command: /start-flower
-  awscli:
-    build:
-      context: .
-      dockerfile: ./compose/production/aws/Dockerfile
-    env_file:
-      - ./.envs/.production/.django
-    volumes:
-      - production_postgres_data_backups:/backups
+
+#  awscli:
+#    build:
+#      context: .
+#      dockerfile: ./compose/production/aws/Dockerfile
+#    env_file:
+#      - ./.envs/.production/.django
+#    volumes:
+#      - production_postgres_data_backups:/backups
+
+  elasticsearch:
+    image: elasticsearch:2
+    ports:
+      - "9200:9200"
+      - "9300:9300"

@@ -1,5 +1,6 @@
 from .base import *  # noqa
 from .base import env
+import os
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -60,3 +61,15 @@ INSTALLED_APPS += ["django_extensions"]  # noqa F405
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+# Haystack settings
+
+ES_URL = urlparse(os.environ.get('BONSAI_URL'))
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
+        'URL': ES_URL.scheme + '://' + ES_URL.hostname + ':9200',
+        'INDEX_NAME': 'haystack',
+    },
+}

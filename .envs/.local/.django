@@ -2,6 +2,7 @@
 # ------------------------------------------------------------------------------
 USE_DOCKER=yes
 IPYTHONDIR=/app/.ipython
+
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
@@ -13,3 +14,9 @@ REDIS_URL=redis://redis:6379/0
 CELERY_FLOWER_USER=keUmVRmpMehXpvLSRutatPCjNdpHeauE
 CELERY_FLOWER_PASSWORD=ji60rGBkJVjTuUyqbDmcRJChWac3ONBLog8ffJchAeWDpCjcsr7hAurRg8bLBgZp
 
+# Databases for initial-data.
+DATABASE_ENGINE=django.db.backends.postgresql
+DATABASE_HOST=postgres
+
+# Haystack connections
+BONSAI_URL=http://elasticsearch:9200/
