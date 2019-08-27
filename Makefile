@@ -29,7 +29,7 @@ stop_rm:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f
 
 rm_volumes:
-	docker volume rm -f panda_local_postgres_data
+	docker volume rm -f panda_local_postgres_data panda_local_postgres_data_backups
 	#panda_local_solr_data
 
 rm_hard: stop_rm rm_volumes
