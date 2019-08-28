@@ -107,10 +107,10 @@ ipython_run:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ipython
 
 bash:
-	docker-compose -f ${COMPOSE_FILE} exec django sh
+	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
 sh:
-	docker-compose -f ${COMPOSE_FILE} exec django sh
+	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
 rebuild_index:
 	docker-compose -f ${COMPOSE_FILE} run --rm django python manage.py rebuild_index --noinput

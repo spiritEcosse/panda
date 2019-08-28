@@ -2,6 +2,8 @@
 # ------------------------------------------------------------------------------
 USE_DOCKER=yes
 IPYTHONDIR=/app/.ipython
+CHAT_ID=
+DJANGO_SETTINGS_MODULE=config.settings.local
 
 # Redis
 # ------------------------------------------------------------------------------
