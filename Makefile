@@ -28,6 +28,7 @@ deploy_hard:
 tagged_django_image:
 	sed -i "s%panda:.*%panda:`git log --format="%H" -n 1`%g" ${COMPOSE_FILE}
 
+
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
 
