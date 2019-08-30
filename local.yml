@@ -10,7 +10,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: panda:88cbbfc9e6b8823ef3c802991ec0e5f5151f8dcd
+    image: panda:533043a2d047e57f346507209b91e47332c6f346
     restart: on-failure
     depends_on:
       - postgres
