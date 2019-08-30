@@ -3,6 +3,7 @@ PORT_WEB?=8000
 COMPOSE_FILE?=local.yml
 PORT_DB?=5432
 PROJECT?=test_panda
+COMMIT_MESSAGE?=
 
 makemessages:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py makemessages -a
@@ -27,6 +28,9 @@ deploy_hard:
 
 tagged_django_image:
 	sed -i "s%panda:.*%panda:`git rev-parse --abbrev-ref HEAD`%g" ${COMPOSE_FILE}
+
+commit: tagged_django_image
+	git add . && git commit -m '${COMMIT_MESSAGE}'
 
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
