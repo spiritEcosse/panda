@@ -25,6 +25,12 @@ tests:
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
 
+tagged_django_image:
+	sed -i "s%panda:.*%panda:`git log --format="%H" -n 1`%g" ${COMPOSE_FILE}
+
+deploy_hard:
+	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
+
 stop_rm:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f
 
@@ -36,6 +42,9 @@ rm_hard: stop_rm rm_volumes
 
 deploy:
 	docker-compose -f ${COMPOSE_FILE} up --scale initial-data=0
+
+build_local:
+	docker build -t panda:`git rev-parse --abbrev-ref HEAD` -f compose/local/django/Dockerfile .
 
 deploy_build:
 	docker-compose -f ${COMPOSE_FILE} up --build --scale initial-data=0
