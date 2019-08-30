@@ -119,8 +119,8 @@ services:
       - ./panda/media:/app/sandbox/public/media/
     user: root
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.initial_data/.postgres
+      - ./.envs/.initial_data/.django
     command: bash -c "cd /app && make sandbox"
     depends_on:
       - postgres

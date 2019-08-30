@@ -1,0 +1,2 @@
+DATABASE_ENGINE=django.db.backends.postgresql
+DATABASE_HOST=postgres
