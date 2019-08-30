@@ -10,7 +10,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: panda_local_django
+    image: panda:telegram_bot
     restart: on-failure
     depends_on:
       - postgres
