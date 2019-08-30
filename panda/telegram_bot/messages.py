@@ -1,19 +1,32 @@
-from telegram.ext import (Updater,Filters,MessageHandler)
-from django.conf import settings
 import csv
+import uuid
+
+from django.conf import settings
+from telegram.ext import (Updater, Filters, MessageHandler)
 
 
-def valid_caption(caption):
-    return [el for el in caption.strip().split("\n") if el]
+class Converter:
+    def __init__(self, update):
+        self.update = update
 
-def receive_message(_, update):
-    if update.channel_post.chat_id == settings.CHAT_ID:
-        valid_caption(update.channel_post.caption)
+    def valid_caption(self):
+        return [el for el in self.update.channel_post.caption.strip().split("\n") if el]
 
-        with open('product.csv', 'w', newline='') as csv_file:
+    def file_name(self):
+        return "{}.csv".format(uuid.uuid4())
+
+    def run(self):
+        self.valid_caption()
+
+        with open(self.file_name(), 'w', newline='') as csv_file:
             writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
             writer.writerow([])
         return True
+
+def receive_message(_, update):
+    if update.channel_post.chat_id == settings.CHAT_ID:
+        return Converter(update).run()
+
 
 def run():
     messageHandler = MessageHandler(Filters.all, receive_message)
