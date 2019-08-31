@@ -22,7 +22,15 @@ class MessagesTest(TestCase):
         self.update.channel_post.caption = ""
         self.converter = Converter(self.update)
 
-    @override_settings(CHAT_ID=11)
+    @override_settings(CHAT_ID=10)
+    def test_receive_message(self):
+        mock_run = Mock()
+
+        with patch('panda.telegram_bot.messages.Converter.run', mock_run):
+            receive_message(Mock(), self.update)
+
+        mock_run.assert_called_once_with()
+
     def test_wrong_chat_id_receive_message(self):
         assert receive_message(Mock(), self.update) is None
 
@@ -49,7 +57,7 @@ class MessagesTest(TestCase):
 
         mock_uuid.assert_called_once_with()
 
-    def test_caption_receive_message(self):
+    def test_valid_caption(self):
         for inp, exp in data_test_various_caption:
             self.update.channel_post.caption = inp
             converter = Converter(self.update)

@@ -335,3 +335,4 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # ------------------------------------------------------------------------------
 
 CHAT_ID = env("CHAT_ID")
+TOKEN_TELEGRAM = env("TOKEN_TELEGRAM")

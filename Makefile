@@ -6,6 +6,7 @@ PROJECT?=test_panda
 COMMIT_MESSAGE?=
 REPO=shevchenkoigor/panda
 DOCKER_FILE=compose/local/django/Dockerfile
+APP?=
 
 makemessages:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py makemessages -a
@@ -120,10 +121,12 @@ pass_change_admin:
 create_superuser:
 	docker-compose -f ${COMPOSE_FILE} run --rm django python manage.py createsuperuser
 
-ipython:
-	docker-compose -f ${COMPOSE_FILE} exec django ipython
+startapp:
+	docker-compose -f ${COMPOSE_FILE} run --rm django python manage.py startapp ${APP}
+	sudo chown igor:users -R ${APP}
+	mv ${APP} panda
 
-ipython_run:
+ipython:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ipython
 
 bash:
