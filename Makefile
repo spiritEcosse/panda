@@ -32,6 +32,9 @@ deploy_hard:
 tagged_django_image:
 	sed -i "s%panda:.*%panda:`git rev-parse --abbrev-ref HEAD`%g" ${COMPOSE_FILE}
 
+build_django:
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
+
 commit: tagged_django_image
 	git add .
 	git commit -m '${COMMIT_MESSAGE}'
