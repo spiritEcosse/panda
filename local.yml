@@ -7,9 +7,6 @@ volumes:
 
 services:
   django: &django
-    build:
-      context: .
-      dockerfile: ./compose/local/django/Dockerfile
     image: shevchenkoigor/panda:telegram_bot
     restart: on-failure
     depends_on:
