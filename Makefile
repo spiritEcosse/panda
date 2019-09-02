@@ -35,10 +35,10 @@ tagged_django_image:
 commit: tagged_django_image
 	git add .
 	git commit -m '${COMMIT_MESSAGE}'
-	#curl -X POST http://127.0.0.1:8094/job/panda/build?token=hRvyQqWEkbPUQrWwskihxmcBWirNFhnwdUITxhpJQbRjuUIKYPILhYQuVRegKzzN --user "igor:1111" -H "`wget -q --auth-no-challenge --user igor --password 1111 --output-document - 'http://127.0.0.1:8094/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'`"
-	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
 	git branch --set-upstream-to=origin/`git rev-parse --abbrev-ref HEAD` `git rev-parse --abbrev-ref HEAD`
 	git push
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
+	#curl -X POST http://127.0.0.1:8094/job/panda/build?token=hRvyQqWEkbPUQrWwskihxmcBWirNFhnwdUITxhpJQbRjuUIKYPILhYQuVRegKzzN --user "igor:1111" -H "`wget -q --auth-no-challenge --user igor --password 1111 --output-document - 'http://127.0.0.1:8094/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'`"
 
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
