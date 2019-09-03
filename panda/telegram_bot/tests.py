@@ -13,7 +13,6 @@ data_test_various_caption = (
     ("тест\n\n\nтест\nтест\n\nтест", ["тест", "тест", "тест", "тест"]),
 )
 
-
 class MessagesTest(TestCase):
 
     def setUp(self):

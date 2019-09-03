@@ -71,7 +71,6 @@ initial-data_bash:
 	docker-compose -f ${COMPOSE_FILE} run initial-data bash
 
 initial-data:
-	docker-compose -f ${COMPOSE_FILE} up -d postgres
 	docker-compose -f ${COMPOSE_FILE} up initial-data
 
 initial-data_logs:
