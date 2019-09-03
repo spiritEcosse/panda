@@ -12,6 +12,9 @@ class Converter:
     def file_name(self):
         return "{}.csv".format(uuid.uuid4())
 
+    def valid_caption(self):
+        return [el for el in self.update.channel_post.caption.strip().split("\n") if el]
+
     def write(self):
         with open(self.file_name(), 'w', newline='') as csv_file:
             writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)

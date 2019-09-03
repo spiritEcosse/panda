@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock, mock_open
 
 from django.test.utils import override_settings
 
-from .messages import Converter, receive_message
+from panda.telegram_bot.views import Converter, receive_message
 
 data_test_various_caption = (
     ("\n\nтест\nтест\nтест\nтест\n", ["тест", "тест", "тест", "тест"]),
@@ -26,7 +26,7 @@ class MessagesTest(TestCase):
     def test_receive_message(self):
         mock_run = Mock()
 
-        with patch('panda.telegram_bot.messages.Converter.run', mock_run):
+        with patch('panda.telegram_bot.views.Converter.run', mock_run):
             receive_message(Mock(), self.update)
 
         mock_run.assert_called_once_with()
@@ -40,9 +40,9 @@ class MessagesTest(TestCase):
         mock_valid_caption = Mock()
         file_name = "unique-string"
         mock_file_name = Mock(return_value=file_name)
-        with patch('panda.telegram_bot.messages.open', mo):
-            with patch('panda.telegram_bot.messages.Converter.valid_caption', mock_valid_caption):
-                with patch('panda.telegram_bot.messages.Converter.file_name', mock_file_name):
+        with patch('panda.telegram_bot.views.open', mo):
+            with patch('panda.telegram_bot.views.Converter.valid_caption', mock_valid_caption):
+                with patch('panda.telegram_bot.views.Converter.file_name', mock_file_name):
                     assert receive_message(Mock(), self.update)
 
         mo.assert_called_once_with(file_name, 'w', newline='')
@@ -52,7 +52,7 @@ class MessagesTest(TestCase):
     def test_unique_file_name(self):
         string = "unique_string"
         mock_uuid = Mock(return_value=string)
-        with patch('panda.telegram_bot.messages.uuid.uuid4', mock_uuid):
+        with patch('panda.telegram_bot.views.uuid.uuid4', mock_uuid):
             assert self.converter.file_name() == "{}.csv".format(string)
 
         mock_uuid.assert_called_once_with()
