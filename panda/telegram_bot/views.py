@@ -3,11 +3,16 @@ import uuid
 
 from django.conf import settings
 from telegram.ext import (Updater, Filters, MessageHandler)
+from django.views.generic.edit import FormView
+from panda.telegram_bot.serializers import MessageSerializer
 
 
-class Converter:
-    def __init__(self, update):
+class Converter(FormView):
+    form = MessageSerializer
+
+    def __init__(self, update, **kwargs):
         self.update = update
+        super(Converter, self).__init__(**kwargs)
 
     def file_name(self):
         return "{}.csv".format(uuid.uuid4())
