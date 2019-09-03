@@ -31,11 +31,11 @@ class MessagesTest(TestCase):
 
         mock_run.assert_called_once_with()
 
-    def test_wrong_chat_id_receive_message(self):
+    def test_wrong_chat_id(self):
         assert receive_message(Mock(), self.update) is None
 
     @override_settings(CHAT_ID=10)
-    def test_create_csv_file_products_receive_message(self):
+    def test_create_csv_file_products(self):
         mo = mock_open()
         mock_valid_caption = Mock()
         file_name = "unique-string"
