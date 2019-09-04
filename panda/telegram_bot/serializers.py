@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal, InvalidOperation
 
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
@@ -14,17 +15,29 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    price_excl_tax = StockRecordSerializer(read_only=True)
+    price_excl_tax = StockRecordSerializer(read_only=True, many=False)
     category_str = serializers.CharField(required=True)
+    production_days = serializers.IntegerField(required=False)
+    product_class = serializers.CharField(required=False)
 
     class Meta:
         model = get_model('catalogue', 'Product')
-        fields = ['title', 'description', 'price_excl_tax', "category_str"]
+        fields = ['title', 'description', 'price_excl_tax', "category_str", "product_class"]
         extra_kwargs = {
             'title': {'required': True},
             'description': {'required': True},
             'price_excl_tax': {'required': True},
         }
+
+    def validate_production_days(self, value):
+        match = re.match(r".*:\s*(?P<days>\d+)(.*)*", value)
+
+        try:
+            days = match.group("days")
+        except AttributeError:
+            raise MessageException(_("Wrong field production_days."))
+
+        return int(days)
 
     def validate_category_str(self, value):
         separator = '>'
@@ -37,9 +50,9 @@ class MessageSerializer(serializers.ModelSerializer):
             hundredths = match.group("hundredths") or ""
             price = match.group("price") + hundredths
         except AttributeError:
-            raise MessageException()
+            raise MessageException(_("Wrong field price."))
 
         try:
             return Decimal(price)
         except InvalidOperation:
-            raise MessageException()
+            raise MessageException(_("Wrong field price."))

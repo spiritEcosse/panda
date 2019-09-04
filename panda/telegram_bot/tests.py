@@ -19,12 +19,18 @@ data_test_various_caption = (
       "category_str": "Категория"}),
 )
 data_test_various_price = (
+    ("Цена: 100$", Decimal("100")),
     ("Price: 100$", Decimal("100")),
     ("Price: 100$/50€", Decimal("100")),
     ("Price:100$/50€", Decimal("100")),
     ("Price:100$ / 50€", Decimal("100")),
     ("Price:  100$  / 50€", Decimal("100")),
     ("Price:  100.90", Decimal("100.90")),
+)
+
+data_test_various_production_days = (
+    ("Срок изготовления: 10 дней.", 10),
+    ("Production days:10days.", 10),
 )
 
 data_test_various_category_str = (
@@ -50,6 +56,11 @@ def test_parse_caption(inp, exp):
     converter = Converter()
     converter.request = request
     assert converter.get_data() == exp
+
+@pytest.mark.parametrize("inp,exp", data_test_various_production_days)
+def test_various_production_days(inp, exp):
+    ms = MessageSerializer()
+    assert ms.validate_production_days(inp) == exp
 
 
 class MessagesTest(TestCase):

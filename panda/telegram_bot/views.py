@@ -17,16 +17,16 @@ class Converter(viewsets.ModelViewSet):
         self.file_name = self.file_mask.format(uuid.uuid4())
         super().__init__(*args, **kwargs)
 
-    # def write(self):
-    #     with open(self.file_name(), 'w', newline='') as csv_file:
-    #         writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    #         writer.writerow([])
-    #     return True
+    def write(self):
+        with open(self.file_name, 'w', newline='') as csv_file:
+            writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([])
+        return True
 
     def get_data(self):
         text = self.request.data.channel_post.caption.strip()
         values = filter(lambda el: el is not "", text.split("\n"))
-        return dict(zip(*(self.serializer_class.Meta.fields, [el for el in values if el])))
+        return dict(zip(*(self.serializer_class.Meta.fields, values)))
 
     @action(detail=False, methods=['post'])
     def run(self, request):
