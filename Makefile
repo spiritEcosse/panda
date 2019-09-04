@@ -109,7 +109,7 @@ freeze:
 	docker-compose -f ${COMPOSE_FILE} exec django pip freeze
 
 restart_django:
-	docker-compose stop django && docker-compose start django
+	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop django && docker-compose start django
 
 restart_django_hard:
 	docker-compose rm django && docker-compose stop django && docker-compose start django
