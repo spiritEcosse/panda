@@ -4,11 +4,10 @@ from unittest.mock import patch, Mock
 
 import pytest
 from django.test.utils import override_settings
+from rest_framework import serializers
 
-from panda.telegram_bot.exceptions import MessageException
 from panda.telegram_bot.serializers import MessageSerializer
 from panda.telegram_bot.views import Converter
-
 
 data_test_various_caption = (
     ("Наименование\nОписание\nЦена: 100$\nКатегория>Подкатегория",
@@ -119,9 +118,9 @@ class MessageSerializerTest(TestCase):
     def test_value_does_not_contain_price(self):
         value = "Wrong price."
         message = "Wrong field price."
-        mock_re = Mock(side_effect=MessageException(message), return_value=None)
+        mock_re = Mock(side_effect=serializers.ValidationError(message), return_value=None)
 
-        with self.assertRaisesRegexp(MessageException, message):
+        with self.assertRaisesRegexp(serializers.ValidationError, message):
             with patch('panda.telegram_bot.serializers.re.match', mock_re):
                 self.ms.validate_price_excl_tax(value)
 
@@ -130,9 +129,9 @@ class MessageSerializerTest(TestCase):
     def test_we_make_wrong_price(self):
         value = "100didnotsee"
         message = "Wrong field price."
-        mock_decimal = Mock(side_effect=MessageException(message))
+        mock_decimal = Mock(side_effect=serializers.ValidationError(message))
 
-        with self.assertRaisesRegexp(MessageException, message):
+        with self.assertRaisesRegexp(serializers.ValidationError, message):
             with patch('panda.telegram_bot.serializers.Decimal', mock_decimal):
                 self.ms.validate_price_excl_tax(value)
 

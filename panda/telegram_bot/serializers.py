@@ -1,11 +1,8 @@
 import re
 from decimal import Decimal, InvalidOperation
 
-from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from rest_framework import serializers
-
-from panda.telegram_bot.exceptions import MessageException
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
@@ -29,13 +26,18 @@ class MessageSerializer(serializers.ModelSerializer):
             'price_excl_tax': {'required': True},
         }
 
+    def validate(self, data):
+        if not data['product_class']:
+            raise serializers.ValidationError("")
+        return data
+
     def validate_production_days(self, value):
         match = re.match(r".*:\s*(?P<days>\d+)(.*)*", value)
 
         try:
             days = match.group("days")
         except AttributeError:
-            raise MessageException(_("Wrong field production_days."))
+            raise serializers.ValidationError("Wrong field production_days.")
 
         return int(days)
 
@@ -50,9 +52,9 @@ class MessageSerializer(serializers.ModelSerializer):
             hundredths = match.group("hundredths") or ""
             price = match.group("price") + hundredths
         except AttributeError:
-            raise MessageException(_("Wrong field price."))
+            raise serializers.ValidationError("Wrong field price.")
 
         try:
             return Decimal(price)
         except InvalidOperation:
-            raise MessageException(_("Wrong field price."))
+            raise serializers.ValidationError("Wrong field price.")
