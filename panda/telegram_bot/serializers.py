@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal, InvalidOperation
-
+import datetime
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
@@ -8,26 +8,36 @@ from rest_framework import serializers
 class StockRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_model('partner', 'StockRecord')
-        fields = ["price_excl_tax"]
+        fields = ["price_excl_tax", "num_in_stock"]
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    price_excl_tax = StockRecordSerializer(read_only=True, many=False)
+    availability = serializers.BooleanField(required=True)
+    price_excl_tax = StockRecordSerializer(read_only=True, many=False, required=False)
     category_str = serializers.CharField(required=True)
     production_days = serializers.IntegerField(required=False)
     product_class = serializers.CharField(required=False)
+    upc = serializers.IntegerField(required=False)
 
     class Meta:
         model = get_model('catalogue', 'Product')
-        fields = ['title', 'description', 'price_excl_tax', "category_str", "product_class"]
+        fields = ['title', "availability", 'price_excl_tax', 'description', "category_str",
+                  "production_days", "product_class", "upc"]
         extra_kwargs = {
             'title': {'required': True},
             'description': {'required': True},
-            'price_excl_tax': {'required': True},
+            'price_excl_tax': {'required': False},
         }
 
+    def get_upc(self, *args):
+        now = datetime.datetime.now()
+        return int((now - datetime.datetime(1970, 1, 1)).total_seconds() * 1000000)
+
+    def validate_availability(self, value):
+        return True if value == "В наличии" else False
+
     def validate(self, data):
-        if not data['product_class']:
+        if not data.get('production_days', False):
             raise serializers.ValidationError("")
         return data
 

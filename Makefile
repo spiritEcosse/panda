@@ -21,7 +21,7 @@ shell:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py shell
 
 pytest:
-	docker-compose -f ${COMPOSE_FILE} exec django pytest
+	docker-compose -f ${COMPOSE_FILE} run --rm django pytest
 
 tests:
 	docker-compose -f ${COMPOSE_FILE} run --rm django tests

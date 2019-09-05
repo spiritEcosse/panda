@@ -17,11 +17,10 @@ class Converter(viewsets.ModelViewSet):
         self.file_name = self.file_mask.format(uuid.uuid4())
         super().__init__(*args, **kwargs)
 
-    def write(self):
+    def write(self, serializer):
         with open(self.file_name, 'w', newline='') as csv_file:
             writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow([])
-        return True
+            writer.writerow(serializer.validated_data.values())
 
     def get_data(self):
         text = self.request.data.channel_post.caption.strip()
@@ -32,9 +31,11 @@ class Converter(viewsets.ModelViewSet):
     def run(self, request):
         self.request = request
 
+        # ToDo replace on wrapper
         if self.request.data.channel_post.chat_id == settings.CHAT_ID:
             serializer = self.get_serializer(data=self.get_data())
             serializer.is_valid(raise_exception=True)
+            self.write(serializer)
             return True
 
 # def run():
