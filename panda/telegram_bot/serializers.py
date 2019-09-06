@@ -38,38 +38,42 @@ class MessageSerializer(serializers.ModelSerializer):
         now = datetime.datetime.now()
         return int((now - datetime.datetime(1970, 1, 1)).total_seconds() * 1000000)
 
-    def validate_availability(self, value):
+    def to_internal_value(self, data):
+        for field in self.fields:
+            parse_method = getattr(self, 'parse_' + field, None)
+
+            if parse_method and field in data:
+                data[field] = parse_method(data[field])
+
+        return super().to_internal_value(data)
+
+    def parse_availability(self, value):
         return True if value == "В наличии" else False
 
-    def validate(self, data):
-        if not data.get('production_days', False):
-            raise serializers.ValidationError("")
-        return data
-
-    def validate_production_days(self, value):
+    def parse_production_days(self, value):
         match = re.match(r".*:\s*(?P<days>\d+)(.*)*", value)
 
         try:
             days = match.group("days")
         except AttributeError:
-            raise serializers.ValidationError("Wrong field production_days.")
+            return ""
 
         return int(days)
 
-    def validate_category_str(self, value):
+    def parse_category_str(self, value):
         separator = '>'
         return " > ".join(map(lambda el: el.strip().capitalize(), value.split(separator)))
 
-    def validate_price_excl_tax(self, value):
+    def parse_price_excl_tax(self, value):
         match = re.match(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
 
         try:
             hundredths = match.group("hundredths") or ""
             price = match.group("price") + hundredths
         except AttributeError:
-            raise serializers.ValidationError("Wrong field price.")
+            return ""
 
         try:
             return Decimal(price)
         except InvalidOperation:
-            raise serializers.ValidationError("Wrong field price.")
+            return ""

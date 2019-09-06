@@ -11,6 +11,7 @@ from rest_framework import serializers
 from panda.telegram_bot.serializers import MessageSerializer
 from panda.telegram_bot.views import Converter
 
+
 class MockDateTime(datetime.datetime):
     @classmethod
     def now(cls, tz=None):
