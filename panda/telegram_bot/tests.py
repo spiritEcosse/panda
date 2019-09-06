@@ -53,7 +53,6 @@ data_test_various_availability = (
     ("На заказ", False),
 )
 
-7
 @pytest.mark.parametrize("inp,exp", data_test_various_price)
 def test_validate_price_excl_tax(inp, exp):
     ms = MessageSerializer()
@@ -173,3 +172,16 @@ class MessageSerializerTest(TestCase):
             assert MessageSerializer().get_upc() == upc
 
         mock_datetime_now.assert_called_once_with()
+
+    def test_required_fields(self):
+        self.assertListEqual(
+            ['title', "availability", 'price_excl_tax', 'description', "category_str"],
+            [field for field, kw in self.ms.Meta.extra_kwargs.items() if kw['required']]
+        )
+
+    def test_order_fields(self):
+        self.assertListEqual(
+            ['title', "availability", 'price_excl_tax', 'description', "category_str",
+             "production_days", "product_class", "upc"],
+            self.ms.Meta.fields
+        )

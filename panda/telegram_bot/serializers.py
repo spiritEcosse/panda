@@ -12,12 +12,12 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    availability = serializers.BooleanField(required=True)
-    price_excl_tax = StockRecordSerializer(read_only=True, many=False, required=False)
-    category_str = serializers.CharField(required=True)
-    production_days = serializers.IntegerField(required=False)
-    product_class = serializers.CharField(required=False)
-    upc = serializers.IntegerField(required=False)
+    availability = serializers.BooleanField()
+    price_excl_tax = StockRecordSerializer(read_only=True, many=False)
+    category_str = serializers.CharField()
+    production_days = serializers.IntegerField()
+    product_class = serializers.CharField()
+    upc = serializers.IntegerField()
 
     class Meta:
         model = get_model('catalogue', 'Product')
@@ -25,8 +25,13 @@ class MessageSerializer(serializers.ModelSerializer):
                   "production_days", "product_class", "upc"]
         extra_kwargs = {
             'title': {'required': True},
+            'availability': {'required': True},
+            'price_excl_tax': {'required': True},
             'description': {'required': True},
-            'price_excl_tax': {'required': False},
+            'category_str': {'required': True},
+            'production_days': {'required': False},
+            'product_class': {'required': False},
+            'upc': {'required': False},
         }
 
     def get_upc(self, *args):
