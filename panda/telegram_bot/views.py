@@ -17,7 +17,6 @@ class Converter(viewsets.ModelViewSet):
     file_mask = "{}.csv"
 
     def __init__(self, *args, **kwargs):
-        self.request = None
         self.file_name = self.file_mask.format(uuid.uuid4())
         super().__init__(*args, **kwargs)
 
@@ -28,14 +27,12 @@ class Converter(viewsets.ModelViewSet):
 
     def get_data(self, update):
         text = update.channel_post.caption.strip()
-        values = filter(lambda el: el is not "", text.split("\n"))
+        values = [value.strip() for value in text.split("\n") if value.strip() is not ""]
         return dict(zip(*(self.serializer_class.Meta.fields, values)))
 
     def create(self, request, *args, **kwargs):
-        self.request = request
-
         bot = Bot(settings.TOKEN_TELEGRAM)
-        update = Update.de_json(json.loads(self.request.body), bot)
+        update = Update.de_json(json.loads(request.body), bot)
 
         # ToDo replace on wrapper
         if update.channel_post.chat_id == settings.CHAT_ID:
