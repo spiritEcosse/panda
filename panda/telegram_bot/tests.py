@@ -85,13 +85,28 @@ def test_various_production_days(inp, exp):
 class MessagesTest(TestCase):
 
     def setUp(self):
-        self.request = Mock()
-        self.request.data.channel_post.chat_id = 10
         self.converter = Converter()
 
     @override_settings(CHAT_ID=11)
+    @override_settings(TOKEN_TELEGRAM="some")
     def test_wrong_chat_id(self):
-        assert self.converter.create(self.request) is None
+        request, update, response, status, settings, bot, loads = \
+            Mock(), Mock(), Mock(), Mock(), Mock(), Mock(), Mock()
+        update.channel_post.chat_id = 10
+        status.HTTP_500_INTERNAL_SERVER_ERROR = 500
+        request.body = "json"
+        update = Mock(return_value=update)
+
+        with patch('panda.telegram_bot.views.Bot', bot):
+            with patch('panda.telegram_bot.views.Update.de_json', update):
+                with patch('panda.telegram_bot.views.json.loads', loads):
+                    with patch('panda.telegram_bot.views.Response', response):
+                        self.converter.create(request)
+
+        bot.assert_called_once_with("some")
+        loads.assert_called_once_with(request.body)
+        update.assert_called_once_with(loads(), bot())
+        response.assert_called_once_with(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_write(self):
         mo = mock_open()
@@ -113,21 +128,29 @@ class MessagesTest(TestCase):
 
     @override_settings(CHAT_ID=10)
     def test_create(self):
-        mock_serializer = MagicMock()
-        mock_write = MagicMock()
         my_data = {"my": "data"}
-        get_data = MagicMock(return_value=my_data)
-        self.converter.write = mock_write
+        loads, bot, serializer, update, request, write, get_data, status, response = \
+            Mock(), Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
+            Mock(), Mock()
+        update.channel_post.chat_id = 10
+        status.HTTP_201_CREATED = 201
+        self.converter.write = write
         self.converter.get_data = get_data
-        self.converter.get_serializer = mock_serializer
+        self.converter.get_serializer = serializer
+        update = Mock(return_value=update)
 
-        assert self.converter.create(self.request) is True
+        with patch('panda.telegram_bot.views.Bot', bot):
+            with patch('panda.telegram_bot.views.json.loads', loads):
+                with patch('panda.telegram_bot.views.Update.de_json', update):
+                    with patch('panda.telegram_bot.views.Response', response):
+                        self.converter.create(request)
 
-        get_data.assert_called_once_with()
-        mock_serializer.assert_called_once_with(data=my_data)
-        serializer = mock_serializer()
+        get_data.assert_called_once_with(update())
+        serializer.assert_called_once_with(data=my_data)
+        serializer = serializer()
         serializer.is_valid.assert_called_once_with(raise_exception=True)
-        mock_write.assert_called_once_with(serializer)
+        write.assert_called_once_with(serializer)
+        response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
     def test_unique_file_name(self):
         string = "unique_string"
