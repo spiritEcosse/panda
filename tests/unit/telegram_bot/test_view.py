@@ -54,18 +54,21 @@ data_test_various_availability = (
     ("На заказ", False),
 )
 
+@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_price)
 def test_parse_price_excl_tax(inp, exp):
     ms = MessageSerializer()
     assert ms.parse_price_excl_tax(inp) == exp
 
+@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_category_str)
 def test_parse_category_str(inp, exp):
     ms = MessageSerializer()
     assert ms.parse_category_str(inp) == exp
 
+@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_caption)
 def test_validate_caption(inp, exp):
@@ -74,12 +77,14 @@ def test_validate_caption(inp, exp):
     converter = Converter()
     assert converter.get_data(update) == exp
 
+@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_production_days)
 def test_various_production_days(inp, exp):
     ms = MessageSerializer()
     assert ms.parse_production_days(inp) == exp
 
+@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_availability)
 def test_various_production_days(inp, exp):
@@ -87,6 +92,7 @@ def test_various_production_days(inp, exp):
     assert ms.parse_availability(inp) == exp
 
 
+@pytest.mark.first
 @pytest.mark.unit
 class MessagesTest(TestCase):
 
@@ -167,6 +173,7 @@ class MessagesTest(TestCase):
         mock_uuid.assert_called_once_with()
 
 
+@pytest.mark.first
 @pytest.mark.unit
 class MessageSerializerTest(TestCase):
 

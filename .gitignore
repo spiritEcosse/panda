@@ -329,7 +329,7 @@ tags
 
 ### Project template
 
-panda/media/
+media/
 
 .pytest_cache/
 

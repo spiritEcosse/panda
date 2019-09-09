@@ -1,10 +1,16 @@
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
+import pytest
 from django.test.utils import override_settings
+from django.urls import include, path, reverse
+from rest_framework import status
+from rest_framework.test import APITestCase, URLPatternsTestCase
 
 
-class AccountTests(APITestCase):
+@pytest.mark.second
+@pytest.mark.integration
+class AccountTests(APITestCase, URLPatternsTestCase):
+    urlpatterns = [
+        path('telegram_bot/', include('panda.panda.telegram_bot.urls')),
+    ]
 
     @override_settings(CHAT_ID=10)
     def test_create_account(self):

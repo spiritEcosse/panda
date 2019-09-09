@@ -135,6 +135,9 @@ ipython:
 bash:
 	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
+bash_test:
+	docker-compose -f ${COMPOSE_FILE} -p ${PROJECT} run --rm django sh
+
 sh:
 	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
@@ -209,3 +212,7 @@ solr-create-collection: solr_stop_rm rm_volume_solr
 build_solr_schema:
 	rm -fr schema.xml
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose build django && docker-compose run --rm django python manage.py build_solr_schema > schema.xml
+
+clean: ## Remove files not in source control
+	sudo find . -type f -name "*.pyc" -delete
+	sudo rm -rf nosetests.xml coverage.xml htmlcov *.egg-info *.pdf dist violations.txt
