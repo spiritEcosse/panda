@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase, URLPatternsTestCase
 @pytest.mark.integration
 class AccountTests(APITestCase, URLPatternsTestCase):
     urlpatterns = [
-        path('telegram_bot/', include('panda.panda.telegram_bot.urls')),
+        path('telegram_bot/', include('panda.telegram_bot.urls')),
     ]
 
     @override_settings(CHAT_ID=10)
