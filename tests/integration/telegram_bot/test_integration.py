@@ -3,13 +3,14 @@ from django.test.utils import override_settings
 from django.urls import include, path, reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
+from panda.telegram_bot.urls import router
 
 
 @pytest.mark.second
 @pytest.mark.integration
 class AccountTests(APITestCase, URLPatternsTestCase):
     urlpatterns = [
-        path('telegram_bot/', include('panda.telegram_bot.urls')),
+        path('telegram_bot/', include(router.urls)),
     ]
 
     @override_settings(CHAT_ID=10)

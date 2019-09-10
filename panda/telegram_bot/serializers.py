@@ -1,54 +1,85 @@
-import re
-from decimal import Decimal, InvalidOperation
 import datetime
+import re
+
+from oscar.core.loading import get_classes
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
+Partner, StockRecord = get_classes('partner.models', ['Partner',
+                                                      'StockRecord'])
+ProductClass, Product, Category, ProductCategory = get_classes(
+    'catalogue.models', ('ProductClass', 'Product', 'Category',
+                         'ProductCategory'))
+
+class ProductClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductClass
+        fields = ["name"]
+
+
+class PartnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partner
+        fields = ["name"]
+
 
 class StockRecordSerializer(serializers.ModelSerializer):
+    partner = PartnerSerializer(many=False, required=False)
+
     class Meta:
-        model = get_model('partner', 'StockRecord')
-        fields = ["price_excl_tax", "num_in_stock"]
+        model = StockRecord
+        fields = ["partner_sku", "price_excl_tax", "num_in_stock", "partner"]
+        extra_kwargs = {
+            "num_in_stock": {"default": 1},
+        }
 
 
 class MessageSerializer(serializers.ModelSerializer):
     availability = serializers.BooleanField()
-    price_excl_tax = StockRecordSerializer(read_only=True, many=False)
+    stock = StockRecordSerializer(many=False, source="product")
     category_str = serializers.CharField()
-    production_days = serializers.IntegerField()
-    product_class = serializers.CharField()
+    production_days = serializers.IntegerField(required=False)
+    product_class = ProductClassSerializer(many=False)
     upc = serializers.IntegerField()
 
     class Meta:
-        model = get_model('catalogue', 'Product')
-        fields = ['title', "availability", 'price_excl_tax', 'description', "category_str",
+        model = Product
+        fields = ['title', "availability", 'stock', 'description', "category_str",
                   "production_days", "product_class", "upc"]
         extra_kwargs = {
             'title': {'required': True},
             'availability': {'required': True},
-            'price_excl_tax': {'required': True},
+            'stock': {'required': True},
             'description': {'required': True},
             'category_str': {'required': True},
-            'production_days': {'required': False},
-            'product_class': {'required': False},
-            'upc': {'required': False},
         }
 
-    def get_upc(self, *args):
+    def parse_upc(self, *args):
         now = datetime.datetime.now()
         return int((now - datetime.datetime(1970, 1, 1)).total_seconds() * 1000000)
 
     def to_internal_value(self, data):
-        for field in self.fields:
-            parse_method = getattr(self, 'parse_' + field, None)
+        for field in self.fields.values():
+            #ToDo replace on https://www.django-rest-framework.org/api-guide/validators/#class-based
+            parse_method = getattr(self, 'parse_' + field.field_name, None)
 
-            if parse_method and field in data:
-                data[field] = parse_method(data[field])
+            if parse_method:
+                if field.field_name in data:
+                    data[field.field_name] = parse_method(data[field.field_name])
+                elif field.required:
+                    data[field.field_name] = parse_method()
 
+        data['product_class']['name'] = data['category_str'].split(">")[0].strip() + " partner"
+        data['stock']['partner'] = {}
+        data['stock']['partner']['name'] = data['product_class']['name']
+        data['stock']['partner_sku'] = data['upc']
+
+        if not data["availability"]:
+            data['stock']['num_in_stock'] = 0
         return super().to_internal_value(data)
 
     def parse_availability(self, value):
-        return True if value == "В наличии" else False
+        return True if value in ["В наличии", "На заказ"] else False
 
     def parse_production_days(self, value):
         match = re.match(r".*:\s*(?P<days>\d+)(.*)*", value)
@@ -64,16 +95,16 @@ class MessageSerializer(serializers.ModelSerializer):
         separator = '>'
         return " > ".join(map(lambda el: el.strip().capitalize(), value.split(separator)))
 
-    def parse_price_excl_tax(self, value):
+    def parse_stock(self, value):
         match = re.match(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
 
         try:
             hundredths = match.group("hundredths") or ""
             price = match.group("price") + hundredths
         except AttributeError:
-            return ""
+            price = ""
 
-        try:
-            return Decimal(price)
-        except InvalidOperation:
-            return ""
+        return {"stock": price}
+
+    def parse_product_class(self):
+        return {"product_class": ""}
