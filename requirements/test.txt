@@ -37,6 +37,7 @@ pysolr==3.8.1 # https://pypi.org/project/pysolr/
 # Tests
 django-webtest==1.9.7
 easy-thumbnails==2.5
+pytest-cov==2.7.1
 
 # Order
 pytest-ordering==0.6

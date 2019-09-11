@@ -5,7 +5,9 @@ PORT_DB?=5432
 PROJECT?=test_panda
 COMMIT_MESSAGE?=
 REPO=shevchenkoigor/panda
+REPO_TEST=shevchenkoigor/panda_test
 DOCKER_FILE=compose/local/django/Dockerfile
+DOCKER_FILE_TEST=compose/test/django/Dockerfile
 APP?=
 
 makemessages:
@@ -31,6 +33,7 @@ deploy_hard:
 
 tagged_django_image:
 	sed -i "s%panda:.*%panda:`git rev-parse --abbrev-ref HEAD`%g" ${COMPOSE_FILE}
+	sed -i "s%panda_test:.*%panda_test:`git rev-parse --abbrev-ref HEAD`%g" test.yml
 
 build_django:
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
@@ -42,7 +45,12 @@ commit: tagged_django_image
 	git push
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
+	docker build -t ${REPO_TEST}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE_TEST} .
+	docker push ${REPO_TEST}:`git rev-parse --abbrev-ref HEAD`
 	#curl -X POST http://127.0.0.1:8094/job/panda/build?token=hRvyQqWEkbPUQrWwskihxmcBWirNFhnwdUITxhpJQbRjuUIKYPILhYQuVRegKzzN --user "igor:1111" -H "`wget -q --auth-no-challenge --user igor --password 1111 --output-document - 'http://127.0.0.1:8094/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'`"
+
+docker_pull:
+	docker pull ${REPO}:`git rev-parse --abbrev-ref HEAD`
 
 deploy_hard:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
@@ -168,8 +176,11 @@ test:
 retest: venv ## Run failed tests only
 	$(PYTEST) --lf
 
-coverage: venv ## Generate coverage report
-	$(PYTEST) --cov=oscar --cov-report=term-missing
+coverage_unit:
+	$(PYTEST) --cov=panda -m unit
+
+coverage_unit_html:
+	$(PYTEST) --cov=panda --cov-report=html -m unit
 
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/

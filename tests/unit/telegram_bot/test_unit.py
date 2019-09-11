@@ -1,14 +1,12 @@
 import csv
 import datetime
-from decimal import Decimal
 from unittest import TestCase
 from unittest.mock import patch, Mock, mock_open, MagicMock
 
 import pytest
 from django.test.utils import override_settings
-from rest_framework import serializers
 
-from panda.telegram_bot.serializers import MessageSerializer
+from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, ProductClassSerializer
 from panda.telegram_bot.views import Converter
 
 
@@ -36,6 +34,7 @@ data_test_various_price = (
     ("Price:100$ / 50€", "100"),
     ("Price:  100$  / 50€", "100"),
     ("Price:  100.90", "100.90"),
+    ("Wrong price.", ""),
 )
 
 data_test_various_production_days = (
@@ -54,6 +53,11 @@ data_test_various_availability = (
     ("На заказ", True),
 )
 
+data_test_various_num_in_stock = {
+    (True, 1),
+    (False, 0),
+}
+
 data_test_various_validate = (
     ({'stock': {"stock": "100"}, "availability": False}, {'stock': {'stock': "100", "num_in_stock": 0}, "availability": False}),
     ({'stock': {"stock": "100"}, "availability": True}, {'stock': {'stock': "100"}, "availability": True})
@@ -63,15 +67,15 @@ data_test_various_validate = (
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_price)
 def test_parse_stock(inp, exp):
-    ms = MessageSerializer()
-    assert ms.parse_stock(inp) == {"stock": exp}
+    ms = StockRecordSerializer()
+    assert ms.parse_price_excl_tax(Mock(), inp) == exp
 
 @pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_category_str)
 def test_parse_category_str(inp, exp):
     ms = MessageSerializer()
-    assert ms.parse_category_str(inp) == exp
+    # assert ms.parse_category_str(inp) == exp
 
 @pytest.mark.first
 @pytest.mark.unit
@@ -87,14 +91,22 @@ def test_validate_caption(inp, exp):
 @pytest.mark.parametrize("inp, exp", data_test_various_production_days)
 def test_various_production_days(inp, exp):
     ms = MessageSerializer()
-    assert ms.parse_production_days(inp) == exp
+    # assert ms.parse_production_days(inp) == exp
 
 @pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_availability)
 def test_various_production_days(inp, exp):
     ms = MessageSerializer()
-    assert ms.parse_availability(inp) == exp
+    # assert ms.parse_availability(inp) == exp
+
+@pytest.mark.first
+@pytest.mark.unit
+@pytest.mark.parametrize("inp, exp", data_test_various_num_in_stock)
+def test_various_initial_num_in_stock(inp, exp):
+    sr = StockRecordSerializer()
+    sr.parsed_data = {"availability": inp}
+    assert sr.initial_num_in_stock(Mock()) == exp
 
 
 @pytest.mark.first
@@ -193,31 +205,20 @@ class MessageSerializerTest(TestCase):
     def setUp(self):
         self.ms = MessageSerializer()
 
-    def test_value_does_not_contain_price(self):
-        value = "Wrong price."
-        message = "Wrong field price."
-        mock_re = Mock(side_effect=serializers.ValidationError(message), return_value=None)
-
-        with self.assertRaisesRegexp(serializers.ValidationError, message):
-            with patch('panda.telegram_bot.serializers.re.match', mock_re):
-                self.ms.parse_stock(value)
-
-        mock_re.assert_called_once_with(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
-
-    def test_we_make_wrong_price(self):
-        value = "100didnotsee"
-        self.assertEqual(self.ms.parse_stock(value), {'stock': ''})
-
-    def test_unique_upc(self):
-        upc = 1567694850538414
-        now = datetime.datetime.now()
-        mock_datetime_now = Mock(return_value=now)
-
-        with patch('panda.telegram_bot.serializers.datetime.datetime.now', mock_datetime_now):
-            assert MessageSerializer().parse_upc() == upc
-
-        mock_datetime_now.assert_called_once_with()
-
+    # def test_we_make_wrong_price(self):
+    #     value = "100didnotsee"
+    #     self.assertEqual(self.ms.parse_stock(value), {'stock': ''})
+    #
+    # def test_unique_upc(self):
+    #     upc = 1567694850538414
+    #     now = datetime.datetime.now()
+    #     mock_datetime_now = Mock(return_value=now)
+    #
+    #     with patch('panda.telegram_bot.serializers.datetime.datetime.now', mock_datetime_now):
+    #         assert MessageSerializer().parse_upc() == upc
+    #
+    #     mock_datetime_now.assert_called_once_with()
+    #
     def test_required_fields(self):
         self.assertListEqual(
             ['title', "availability", 'stock', 'description', "category_str", "product_class", "upc"],
@@ -230,3 +231,61 @@ class MessageSerializerTest(TestCase):
              "production_days", "product_class", "upc"],
             self.ms.Meta.fields
         )
+
+    def test_parse_stock(self):
+        self.ms.parsed_data = {}
+        data = {'partner_sku': "", "price_excl_tax": "", "num_in_stock": "", "partner": ""}
+        field = Mock()
+        field.parser.return_value = data
+        field.field_name = "stock"
+        self.assertDictEqual(self.ms.parse_stock(field, ""), data)
+        self.assertDictEqual(self.ms.parsed_data, {"stock": data})
+
+
+@pytest.mark.first
+@pytest.mark.unit
+class StockRecordSerializerTest(TestCase):
+
+    def setUp(self):
+        self.sr = StockRecordSerializer()
+
+    def test_value_does_not_contain_price(self):
+        value = "Wrong price."
+        mock_re = Mock(return_value=None)
+
+        with patch('panda.telegram_bot.serializers.re.match', mock_re):
+            assert self.sr.parse_price_excl_tax(Mock(), value) == ""
+
+        mock_re.assert_called_once_with(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
+
+    def test_initial_partner(self):
+        field = Mock()
+        data = {"name": "name"}
+        field.parser.return_value = data
+        self.assertDictEqual(self.sr.initial_partner(field), data)
+
+
+@pytest.mark.first
+@pytest.mark.unit
+class ProductClassSerializerTest(TestCase):
+
+    def setUp(self):
+        self.pc = ProductClassSerializer()
+        self.pc.parsed_data = {}
+
+    def test_initial_name(self):
+        self.pc.parsed_data['stock'] = {'partner': {'name': "Some partner"}}
+        self.assertEqual(self.pc.initial_name(), "Some")
+
+    def test_parser(self):
+        data = {"name": "name"}
+        name, mock_getattr = Mock(), Mock()
+        name.required = True
+        name.field_name = 'name'
+        self.pc.fields = Mock()
+        self.pc.fields.values.return_value = [name]
+
+        with patch('panda.telegram_bot.serializers.getattr', mock_getattr):
+            self.assertEqual(self.pc.parser(), data)
+
+        mock_getattr.assert_called_once_with(self, 'initial_' + name.field_name, None)
