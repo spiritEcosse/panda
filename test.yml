@@ -2,7 +2,7 @@ version: '3'
 
 services:
   django: &django
-    image: shevchenkoigor/panda_test:telegram_bot
+    image: shevchenkoigor/panda:telegram_bot_test
     restart: on-failure
     depends_on:
       - postgres
@@ -38,7 +38,7 @@ services:
 
   celeryworker:
     <<: *django
-    image: shevchenkoigor/panda_test:telegram_bot
+    image: shevchenkoigor/panda:telegram_bot_test
     depends_on:
       - redis
       - postgres
@@ -48,7 +48,7 @@ services:
 
   celerybeat:
     <<: *django
-    image: shevchenkoigor/panda_test:telegram_bot
+    image: shevchenkoigor/panda:telegram_bot_test
     depends_on:
       - redis
       - postgres
@@ -58,7 +58,7 @@ services:
 
   flower:
     <<: *django
-    image: shevchenkoigor/panda_test:telegram_bot
+    image: shevchenkoigor/panda:telegram_bot_test
     ports:
       - "5552:5555"
     command: /start-flower
