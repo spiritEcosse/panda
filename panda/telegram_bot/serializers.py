@@ -69,11 +69,6 @@ class MessageSerializer(serializers.ModelSerializer):
                 elif field.required:
                     data[field.field_name] = parse_method()
 
-        data['product_class']['name'] = data['category_str'].split(">")[0].strip() + " partner"
-        data['stock']['partner'] = {}
-        data['stock']['partner']['name'] = data['product_class']['name']
-        data['stock']['partner_sku'] = data['upc']
-
         if not data["availability"]:
             data['stock']['num_in_stock'] = 0
         return super().to_internal_value(data)
@@ -104,7 +99,18 @@ class MessageSerializer(serializers.ModelSerializer):
         except AttributeError:
             price = ""
 
-        return {"stock": price}
+        return {
+            "stock": price,
+            'partner_sku': self.data['upc'],
+            'partner': {
+                'name': self.data['category_str'].split(">") + " partner"
+            }
+        }
 
     def parse_product_class(self):
-        return {"product_class": ""}
+        return {
+            "product_class":
+                {
+                    'name': self.data['category_str'].split(">")[0].strip()
+                }
+        }
