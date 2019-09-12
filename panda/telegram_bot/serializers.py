@@ -14,9 +14,6 @@ class ProductClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductClass
         fields = ["name"]
-        extra_kwargs = {
-            'name': {'required': True},
-        }
 
     def __init__(self, *args, **kwargs):
         self.parsed_data = kwargs.get('data', {})
@@ -169,11 +166,11 @@ class MessageSerializer(serializers.ModelSerializer):
         match = re.match(r".*:\s*(?P<days>\d+)(.*)*", value)
 
         try:
-            days = match.group("days")
+            days = int(match.group("days"))
         except AttributeError:
-            return ""
+            days = None
 
-        return int(days)
+        return days
 
     def parse_category_str(self, _, value):
         separator = '>'

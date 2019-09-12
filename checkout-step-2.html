@@ -1,0 +1,324 @@
+{% load widget_tweaks %}
+<!doctype html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Срочная доставка свежих цветов в Спб | Заказать букет цветов в Санкт Петербурге | Флоберис</title>
+  <meta name="description" content="✿✿✿ Цветы с доставкой на дом в любой район Санкт Петербурга ✿✿✿ Цветочный интернет магазин «Флоберис» предлагает заказать красивые свежие цветы и эксклюзивные сборные букеты. Теперь, купить букет цветов в Спб — легко! Быстрая доставка по низкой цене.">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <script src="https://cdn.ravenjs.com/3.27.0/raven.min.js"></script>
+  <script>
+    Raven.config('https://c2da11ec6c3b401694f7c37bcd6d969b@142.93.41.179/3').install();
+  </script>
+
+  <!-- Google Tag Manager -->
+	<script>
+		(function(w, d, s, l, i) {
+		  w[l] = w[l] || [];
+		  w[l].push({
+		    'gtm.start': new Date().getTime(),
+		    event: 'gtm.js'
+		  });
+		  var f = d.getElementsByTagName(s)[0],
+		    j = d.createElement(s),
+		    dl = l != 'dataLayer' ? '&l=' + l : '';
+		  j.async = true;
+		  j.src =
+		    'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+		  f.parentNode.insertBefore(j, f);
+		})(window, document, 'script', 'dataLayer', 'GTM-WK8LWFF');
+	</script>
+	<!-- End Google Tag Manager -->
+
+	<meta property="og:url" content="https://www.floberis.ru/checkout/step2/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Флоберис :: свежие цветы каждый день!">
+  <meta property="og:description" content="✿✿✿ Цветы с доставкой на дом в любой район Санкт Петербурга ✿✿✿ Цветочный интернет магазин «Флоберис» предлагает заказать красивые свежие цветы и эксклюзивные сборные букеты. Теперь, купить букет цветов в Спб — легко! Быстрая доставка по низкой цене.">
+ 	<meta property="og:image" content="https://www.floberis.ru/static/images/logo.svg">
+	
+<link href="/static/dist/style-32728eb73af90d771107.css" rel="stylesheet"></head>
+
+<body>
+	<div class="wrapper">
+		
+		<!-- Top Banner start -->
+<!-- 		<div class="top-banner" id="top-banner">
+			<div class="container">
+				<div class="top-banner__content">
+					<a href="/" class="top-banner__content-logo">
+						<img src="/static/images/logo.svg" alt="Floberis" class="top-banner__logo-src">
+					</a>
+					<span class="top-banner__content-body">Доставка за 45 минут свежих букетов по СПб</span>
+				</div>
+			</div>
+		</div> -->
+		<!-- Top Banner end -->
+
+		<!-- Header start -->
+		<header class="header header--checkout">
+
+			<!-- Top Banner start -->
+			<div class="close-banner close-banner--delivery" id="close-banner">
+				<!-- <a href="javascript: void(0);" class="close-banner__close" id="close-banner__close"></a> -->
+				<div class="close-banner__content">
+					<a href="/" class="top-banner__content-logo">
+						<img src="/static/images/logo.svg" alt="Floberis" class="top-banner__logo-src">
+					</a>
+					<span class="top-banner__content-body">Доставка за 45 минут свежих букетов по СПб и России</span>
+<!-- 					<p>Уважаемые клиенты,<br class="br br--374"> <span class="top-banner__content-body--bold">с 12 по 25 ноября мы<br class="br br--767"> <span class="top-banner__content-body--red">не сможем принимать заказы</span></span>,<br class="br br--767"> по причине открытия своей<br class="br br--374"> Цветочной Лавки.</p>
+					<p><span class="top-banner__content-body--bold">С 26 ноября мы <span class="top-banner__content-body--red">продолжим<br class="br br--767"> работу в штатном режиме</span></span>.<br class="br br--767"> Спасибо за понимание!</p> -->
+				</div>
+			</div>
+			<!-- Top Banner end -->
+			
+			<div class="container">
+				<div class="header-wrapper">
+		
+					<!-- Header Logo start -->
+					<div class="header__logo">
+						<a href="/" class="header__logo-link">
+							<img src="/static/images/logo-new.svg?new" alt="" class="header__logo-icon">
+<!-- 							<div class="header__logo-content">
+								<div class="header__logo-title">Флоберис</div>
+								<div class="header__logo-description">Свежие цветы каждый день</div>
+							</div> -->
+						</a>
+					</div>
+					<!-- Header Logo end -->
+					
+					<!-- Header Steps start -->
+					<div class="header__steps">
+						<ul class="header__steps-list">
+							<li class="header__steps-item">Контакты</li>
+							<li class="header__steps-item header__steps-item--active">Адрес и время</li>
+							<li class="header__steps-item">Оплата</li>
+						</ul>
+					</div>
+					<!-- Header Steps end -->
+
+				</div>		
+			</div>
+		</header>
+		<!-- Header end -->
+		
+		<div class="content" id="content">
+			<div class="container">
+				<div class="content__inner content__inner--checkout">
+	
+					<!-- Form start -->
+					<div class="content__step content__step--700 content__step--2">
+						<h1 class="content__step-title">Оформление заказа</h1>
+						<!-- Error message start -->
+						{% if messages %}
+						<div class="content__step-error-message">
+							<ul class="content__step-error-list">
+								{% for message in messages %}
+								<li  class="content__step-error-item">{{ message }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+						{% endif %}
+						<!-- Error message end -->
+						<form action="" class="content__step-form" method="post">
+							{% csrf_token %}
+							<div class="content__form-group">
+
+								<!-- "Не показывать, если отмечен чекбокс Заберу цветы из салона" или отмечен чекбокс "Я получатель" -->
+								<div class="content__form-row" {% if order_pickup_data.pickup or order_recipient_data.recipient_is_customer %}style="display:none"{% endif %}>
+									<div class="content__row-checkbox-wrapper">
+										<label for="{{ form_notifications.clarify_order_with_recipient.id_for_label }}" class="content__form-checkbox-label">Позвонить получателю для уточнения времени и адреса
+											{{ form_notifications.clarify_order_with_recipient|attr:"maxlength:255"|add_class:"content__form-checkbox"}}
+											<span class="content__form-checkmark"></span>
+										</label>
+									</div>
+									<div class="content__row-checkbox-wrapper">
+										<label for="{{ form_notifications.do_not_inform_about_flowers.id_for_label }}" class="content__form-checkbox-label">Не говорить, что это цветы
+											{{ form_notifications.do_not_inform_about_flowers|attr:"maxlength:255"|add_class:"content__form-checkbox"}}
+											<span class="content__form-checkmark"></span>
+										</label>
+									</div>
+								</div>
+								<!-- Конец "Не показывать, если отмечен чекбокс Заберу цветы из салона" или отмечен чекбокс "Я получатель" -->
+								{% if order_pickup_data.pickup %}
+									<div class="content__form-address">
+										<div class="content__form-row">
+											<div class="content__form-col content__form-col--29 content__form-col--step-2">
+												<label for="id_city" class="content__form-label">Выберите город</label>
+												<input type="text" name="city" id="id_city" class="content__form-input" required="" value="Санкт-Петербург">
+											</div>
+											<div class="content__form-col content__form-col--29 content__form-col--step-2">
+												<label for="id_line1" class="content__form-label">Название улицы</label>
+												<!-- вставить value="Невский проспект", если был отмечен чекбокс Заберу цветы из салона -->
+												{{ form_address.line1|attr:"maxlength:255"|attr:"required:"|attr:"placeholder:Улица"|add_class:"content__form-input"|attr:"readonly:readonly"}}
+											</div>
+											<div class="content__form-col content__form-col--21 content__form-col--step-2">
+												<label for="id_house" class="content__form-label">Номер дома, корпус</label>
+												<!-- вставить value="22", если был отмечен чекбокс Заберу цветы из салона -->
+												{{ form_address.house|attr:"maxlength:255"|attr:"required:"|attr:"placeholder:Дом"|add_class:"content__form-input"|attr:"readonly:readonly"}}
+											</div>
+											<div class="content__form-col content__form-col--21 content__form-col--step-2">
+												<label for="id_flat" class="content__form-label">Номер квартиры</label>
+												{{ form_address.flat|attr:"maxlength:255"|attr:"required:"|attr:"placeholder:Кв/Офис"|add_class:"content__form-input"|attr:"readonly:readonly"}}
+											</div>
+										</div>
+											{{ form_address.country }}
+										<div class="content__form-row">
+											<div class="content__form-col content__form-col--57">
+												{{ form_address.notes|attr:"maxlength:255"|attr:"placeholder:Самовывоз осуществляется по данному адресу. После заказа мы с вами обязательно свяжемся и все уточним :)"|attr:"cols:30"|attr:"rows:10"|add_class:"content__form-input content__form-input--textarea"|attr:"readonly:readonly"}}
+											</div>
+										</div>
+									</div>
+								{% else %}
+									<div class="content__form-address">
+										<div class="content__form-row">
+											<div class="content__form-col content__form-col--29 content__form-col--step-2">
+												<label for="id_city" class="content__form-label">Выберите город</label>
+												<input type="text" name="city" id="id_city" class="content__form-input" required="" value="Санкт-Петербург">
+											</div>
+											<div class="content__form-col content__form-col--29 content__form-col--step-2">
+												<label for="id_line1" class="content__form-label">Название улицы</label>
+												<!-- вставить value="Невский проспект", если был отмечен чекбокс Заберу цветы из салона -->
+												{{ form_address.line1|attr:"maxlength:255"|attr:"required:"|attr:"placeholder:Улица"|add_class:"content__form-input"}}
+											</div>
+											<div class="content__form-col content__form-col--21 content__form-col--step-2">
+												<label for="id_house" class="content__form-label">Номер дома, корпус</label>
+												<!-- вставить value="22", если был отмечен чекбокс Заберу цветы из салона -->
+												{{ form_address.house|attr:"maxlength:255"|attr:"required:"|attr:"placeholder:Дом"|add_class:"content__form-input"}}
+											</div>
+											<div class="content__form-col content__form-col--21 content__form-col--step-2">
+												<label for="id_flat" class="content__form-label">Номер квартиры</label>
+												{{ form_address.flat|attr:"maxlength:255"|attr:"placeholder:Кв/Офис"|add_class:"content__form-input"}}
+											</div>
+										</div>
+											{{ form_address.country }}
+										<div class="content__form-row">
+											<div class="content__form-col content__form-col--57">
+												{{ form_address.notes|attr:"maxlength:255"|attr:"placeholder:Укажите номер корпуса, парадной или любые другие комментарии"|attr:"cols:30"|attr:"rows:10"|add_class:"content__form-input content__form-input--textarea"}}
+											</div>
+										</div>
+									</div>
+								{% endif %}
+
+
+							</div>
+							<div class="content__form-group">
+								<h2 class="content__form-subtitle">Время{% if order_pickup_data.pickup %}, в которое приедете за заказом {% else %} доставки {% endif %}</h2>
+								<div class="header__delivery-selects header__delivery-selects--checkout">
+									<div class="header__delivery-select-wrapper header__delivery-select-wrapper--date">
+										<div class="header__delivery-select header__delivery-select--date"></div>
+									</div>
+									<div class="header__delivery-select-wrapper header__delivery-select-wrapper--time">
+										<div class="header__delivery-select header__delivery-select--time"></div>
+									</div>
+								</div>
+								{{ form_date.courier_datetime|attr:"type:hidden"|attr:"required:"}}
+
+<!-- 								<div class="header__delivery-links">
+									<a href="#" class="header__delivery-links-sooner">Как можно скорее</a>
+								</div> -->
+							</div>
+							<div class="content__form-buttons">
+								<a href="/checkout/" class="content__form-button content__form-button--secondary">К контактам</a>
+								<input type="submit" class="content__form-button content__form-button--primary" value="Перейти к оплате">
+							</div>
+						</form>
+					</div>
+					<!-- Form end -->
+	
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer start -->
+		<footer class="b-footer">
+			<div class="container">
+				<ul class="b-footer__widgets">
+					<li class="b-footer__widgets-item">
+						<a href="tel:88007774172" class="b-footer__widgets-link">8 800 777 41 72</a>
+						<div class="b-footer__widget-hours">Работаем с 9:00 до 23:00</div>
+					</li>
+					<li class="b-footer__widgets-item">
+						<h4 class="b-footer__widgets-title">Самовывоз</h4>
+						<div class="b-footer__widgets-address">г. Санкт-Петербург,<br>ул. Некрасова, 14а</div>
+					</li>
+					<li class="b-footer__widgets-item">
+						<h4 class="b-footer__widgets-title">Присоединяйтесь к нам</h4>
+						<ul class="contact__us-socials contact__us-socials--b-footer">
+							<li class="contact__socials-item">
+								<a href="https://vk.com/floberis" class="contact__socials-link" target="_blank" rel="nofollow">
+									<img src="/static/images/vk-social.svg" alt="VK" class="contact__socials-icon contact__socials-icon--vk">
+								</a>
+							</li>
+							<li class="contact__socials-item">
+								<a href="https://www.facebook.com/floberis.ru" class="contact__socials-link" target="_blank" rel="nofollow">
+									<img src="/static/images/fb-social.svg" alt="Facebook" class="contact__socials-icon">
+								</a>
+							</li>
+							<li class="contact__socials-item">
+								<a href="https://www.instagram.com/floberis.ru/" class="contact__socials-link" target="_blank" rel="nofollow">
+									<img src="/static/images/IG_Glyph_Fill.svg" alt="Instagram" class="contact__socials-icon">
+								</a>
+							</li>
+						</ul>
+					</li>
+					<li class="b-footer__widgets-item">
+						<ul class="b-footer__widgets-nav">
+							<li class="b-footer__nav-item">
+								<a href="/#contact" class="b-footer__nav-link b-footer__nav-link--red">Перейти к контактам</a>
+							</li>
+							<li class="b-footer__nav-item">
+								<a href="/otmena_zakaza/" class="b-footer__nav-link">Возврат цветов и букетов</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</footer>
+		<!-- Footer end -->
+		
+	</div>
+	<script>
+		var CSRF_TOKEN = '{{csrf_token}}';
+	</script>
+<script type="text/javascript" src="/static/dist/main-32728eb73af90d771107.js"></script></body>
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+    $( "form" ).submit(function( event ) {
+        event.preventDefault();
+
+        var $this = $(this);
+        var postURL = '/checkout/step2/';
+        var formData = new FormData(this);
+
+        $.ajax({
+            type: "POST",
+            url: postURL,
+            data: formData,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                $(".content__step-error-message").remove();
+                console.log('success');
+            },
+            error: function(data) {
+                $(".content__step-error-message").remove();
+                html = "<div class=\"content__step-error-message\"><ul class=\"content__step-error-list\">";
+
+                $.each(data.responseJSON, function (key, value) {
+                    $.each(value, function (key_array, data) {
+                        html += "<li class=\"content__step-error-item\">" + data.message + "</li>";
+                    });
+                });
+                html += "</ul></div>";
+                $(".content__step-title").after(html);
+            }
+        });
+    });
+</script>
+
+
+</html>
