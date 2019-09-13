@@ -1,22 +1,14 @@
-import csv
+from freezegun import freeze_time
 import datetime
 from unittest import TestCase
-from unittest.mock import patch, Mock, mock_open, MagicMock, call
+from unittest.mock import patch, Mock, MagicMock, call
 
 import pytest
 from django.test.utils import override_settings
 
-from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, ProductClassSerializer,\
-    PartnerSerializer
+from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
+    ProductClassSerializer, PartnerSerializer
 from panda.telegram_bot.views import Converter
-
-
-class MockDateTime(datetime.datetime):
-    @classmethod
-    def now(cls, tz=None):
-        return cls(2019, 9, 5, 14, 47, 30, 538414)
-
-datetime.datetime = MockDateTime
 
 data_test_various_caption = (
     ("title\navailability\nPrice: 100$\ndescription\ncategory_str>category_str",
@@ -72,21 +64,18 @@ data_test_various_validate = (
     ({'stock': {"stock": "100"}, "availability": True}, {'stock': {'stock': "100"}, "availability": True})
 )
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp,exp", data_test_various_price)
 def test_parse_stock(inp, exp):
     ms = StockRecordSerializer()
     assert ms.parse_price_excl_tax(Mock(), inp) == exp
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_category_str)
 def test_parse_category_str(inp, exp):
     ms = MessageSerializer()
     assert ms.parse_category_str(Mock(), inp) == exp
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_caption)
 def test_validate_caption(inp, exp):
@@ -95,14 +84,12 @@ def test_validate_caption(inp, exp):
     converter = Converter()
     assert converter.get_data(update) == exp
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_production_days)
 def test_various_production_days(inp, exp):
     ms = MessageSerializer()
     assert ms.parse_production_days(Mock(), inp) == exp
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_availability)
 def test_availability(inp, exp):
@@ -112,7 +99,6 @@ def test_availability(inp, exp):
     assert ms.parse_availability(field, inp) == exp
     assert ms.parsed_data == {field.field_name: exp}
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_num_in_stock)
 def test_various_initial_num_in_stock(inp, exp):
@@ -121,7 +107,6 @@ def test_various_initial_num_in_stock(inp, exp):
     assert sr.initial_num_in_stock(Mock()) == exp
 
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_validate)
 def test_validate(inp, exp):
@@ -129,7 +114,6 @@ def test_validate(inp, exp):
     # assert exp == ms.validate(inp)
 
 
-@pytest.mark.first
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_initial_parner_name)
 def test_partner_name(inp, exp):
@@ -138,7 +122,6 @@ def test_partner_name(inp, exp):
     assert ps.initial_name() == exp
 
 
-@pytest.mark.first
 @pytest.mark.unit
 class MessagesTest(TestCase):
 
@@ -166,33 +149,32 @@ class MessagesTest(TestCase):
         update.assert_called_once_with(loads(), bot())
         response.assert_called_once_with(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def test_write(self):
-        mo = mock_open()
-        mock_csv_writer = MagicMock()
-        serializer = MagicMock()
-        validated_data = [1, 2]
-        serializer.validated_data.values.return_value = validated_data
-        file_name = "unique-string"
-        self.converter.file_name = file_name
-
-        with patch('panda.telegram_bot.views.open', mo):
-            with patch('panda.telegram_bot.views.csv.writer', mock_csv_writer):
-                self.converter.write(serializer)
-
-        mo.assert_called_once_with(file_name, 'w', newline='')
-        mock_csv_writer.assert_called_once_with(mo(), quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_writer = mock_csv_writer()
-        csv_writer.writerow.assert_called_once_with(validated_data)
+    # def test_write(self):
+    #     mo = mock_open()
+    #     mock_csv_writer = MagicMock()
+    #     serializer = MagicMock()
+    #     validated_data = [1, 2]
+    #     serializer.validated_data.values.return_value = validated_data
+    #     file_name = "unique-string"
+    #     self.converter.file_name = file_name
+    #
+    #     with patch('panda.telegram_bot.views.open', mo):
+    #         with patch('panda.telegram_bot.views.csv.writer', mock_csv_writer):
+    #             self.converter.write(serializer)
+    #
+    #     mo.assert_called_once_with(file_name, 'w', newline='')
+    #     mock_csv_writer.assert_called_once_with(mo(), quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    #     csv_writer = mock_csv_writer()
+    #     csv_writer.writerow.assert_called_once_with(validated_data)
 
     @override_settings(CHAT_ID=10)
     def test_create(self):
         my_data = {"my": "data"}
-        loads, bot, serializer, update, request, write, get_data, status, response = \
-            Mock(), Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
+        loads, bot, serializer, update, request, get_data, status, response = \
+            Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
             Mock(), Mock()
         update.channel_post.chat_id = 10
         status.HTTP_201_CREATED = 201
-        self.converter.write = write
         self.converter.get_data = get_data
         self.converter.get_serializer = serializer
         update = Mock(return_value=update)
@@ -207,7 +189,6 @@ class MessagesTest(TestCase):
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
         serializer.is_valid.assert_called_once_with(raise_exception=True)
-        write.assert_called_once_with(serializer)
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
     def test_unique_file_name(self):
@@ -219,7 +200,6 @@ class MessagesTest(TestCase):
         mock_uuid.assert_called_once_with()
 
 
-@pytest.mark.first
 @pytest.mark.unit
 class ProductClassSerializerTest(TestCase):
 
@@ -255,8 +235,15 @@ class ProductClassSerializerTest(TestCase):
             self.s.Meta.fields
         )
 
+    def test_create(self):
+        validated_data = {"name": "name"}
+        self.s.Meta = Mock()
+        product_class = Mock()
+        self.s.Meta.model.objects.get_or_create.return_value = product_class, False
+        self.assertEqual(self.s.create(validated_data), product_class)
+        self.s.Meta.model.objects.get_or_create.assert_called_once_with(**validated_data)
 
-@pytest.mark.first
+
 @pytest.mark.unit
 class StockRecordSerializerTest(TestCase):
 
@@ -326,18 +313,47 @@ class StockRecordSerializerTest(TestCase):
             self.s.Meta.fields
         )
 
+    @freeze_time("2019-9-5 14:47:30.538414")
     def test_initial_partner_sku(self):
         upc = 1567694850538414
-        now = datetime.datetime.now()
-        mock_datetime_now = Mock(return_value=now)
+        mock_datetime_now = Mock(return_value=datetime.datetime.now())
 
         with patch('panda.telegram_bot.serializers.datetime.datetime.now', mock_datetime_now):
             assert self.s.initial_partner_sku(Mock()) == upc
 
         mock_datetime_now.assert_called_once_with()
 
+    def test_create(self):
+        order = Mock()
+        validated_data = {
+            "partner_sku": 12,
+            "partner": {"name": "name"}
+        }
+        inp = validated_data.copy()
+        stock, product, order.partner, partner = Mock(), Mock(), Mock(), Mock()
 
-@pytest.mark.first
+        self.s.Meta = Mock()
+        self.s.Meta.model.objects.create.return_value = stock
+        self.s.fields = {"partner": order.partner}
+
+        order.partner.create.return_value = partner
+        order.serializer_meta = self.s.Meta
+
+        exp = {"partner_sku": 12}
+
+        with patch('panda.telegram_bot.serializers.PartnerSerializer', order.partner):
+            self.assertEqual(self.s.create(validated_data, product), stock)
+            self.assertDictEqual(exp, validated_data)
+
+        self.assertListEqual(
+            order.mock_calls,
+            [
+                call.partner.create(inp['partner']),
+                call.serializer_meta.model.objects.create(product=product, partner=partner, **validated_data),
+            ]
+        )
+
+
 @pytest.mark.unit
 class PartnerSerializerTest(TestCase):
 
@@ -369,8 +385,15 @@ class PartnerSerializerTest(TestCase):
             self.s.Meta.fields
         )
 
+    def test_create(self):
+        validated_data = {"name": "name"}
+        self.s.Meta = Mock()
+        partner = Mock()
+        self.s.Meta.model.objects.get_or_create.return_value = partner, False
+        self.assertEqual(self.s.create(validated_data), partner)
+        self.s.Meta.model.objects.get_or_create.assert_called_once_with(**validated_data)
 
-@pytest.mark.first
+
 @pytest.mark.unit
 class MessageSerializerTest(TestCase):
 
@@ -462,3 +485,50 @@ class MessageSerializerTest(TestCase):
                 self.s.parse_production_days(Mock(), value)
 
         mock_re.assert_called_once_with(r".*:\s*(?P<days>\d+)(.*)*", value)
+
+    def test_create(self):
+        order = Mock()
+        create_from_breadcrumbs, product, product_class_model = Mock(), Mock(), Mock()
+        create_from_breadcrumbs.return_value = create_from_breadcrumbs
+        self.s.Meta = Mock()
+        self.s.Meta.model.objects.create.return_value = product
+
+        order.product_class = Mock()
+        order.message_serializer_meta = self.s.Meta
+        order.stock_record =Mock()
+        order.create_from_breadcrumbs = create_from_breadcrumbs
+        order.product_category = Mock()
+        order.product_class.create.return_value = product_class_model
+
+        self.s.fields = {
+            "availability": Mock(), "stock": order.stock_record, "product_class": order.product_class
+        }
+        inp = {
+            "title": "title",
+            "availability": True,
+            "category_str": "category_str",
+            'stock': {
+                "partner_sku": 12, 'partner': {"name": "name"}
+            },
+            "product_class": {"name": "name"}
+        }
+        validated_data = inp.copy()
+        exp = {"title": "title"}
+
+        with patch('panda.telegram_bot.serializers.StockRecordSerializer', order.stock_record):
+            with patch('panda.telegram_bot.serializers.ProductClassSerializer', order.product_class):
+                with patch('panda.telegram_bot.serializers.create_from_breadcrumbs', create_from_breadcrumbs):
+                    with patch('panda.telegram_bot.serializers.ProductCategory', order.product_category):
+                        self.assertEqual(self.s.create(validated_data), product)
+                        self.assertDictEqual(exp, validated_data)
+
+        self.assertListEqual(
+            order.mock_calls,
+            [
+                call.product_class.create(inp['product_class']),
+                call.create_from_breadcrumbs(inp['category_str']),
+                call.message_serializer_meta.model.objects.create(product_class=product_class_model, **validated_data),
+                call.product_category.objects.create(product=product, category=create_from_breadcrumbs),
+                call.stock_record.create(inp['stock'], product=product),
+            ]
+        )

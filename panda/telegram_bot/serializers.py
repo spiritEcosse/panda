@@ -1,7 +1,7 @@
 import datetime
 import re
 
-from oscar.core.loading import get_classes
+from oscar.core.loading import get_classes, get_class
 from rest_framework import serializers
 
 Partner, StockRecord = get_classes('partner.models', ['Partner',
@@ -9,6 +9,8 @@ Partner, StockRecord = get_classes('partner.models', ['Partner',
 ProductClass, Product, Category, ProductCategory = get_classes(
     'catalogue.models', ('ProductClass', 'Product', 'Category',
                          'ProductCategory'))
+create_from_breadcrumbs = get_class('catalogue.categories', 'create_from_breadcrumbs')
+
 
 class ProductClassSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,6 +33,9 @@ class ProductClassSerializer(serializers.ModelSerializer):
 
     def initial_name(self):
         return self.parsed_data['stock']['partner']['name'].split(" partner")[0]
+
+    def create(self, validated_data):
+        return self.Meta.model.objects.get_or_create(**validated_data)[0]
 
 
 class PartnerSerializer(serializers.ModelSerializer):
@@ -57,6 +62,9 @@ class PartnerSerializer(serializers.ModelSerializer):
 
     def initial_name(self):
         return self.parsed_data['category_str'].split(">")[0].strip().capitalize() + " partner"
+
+    def create(self, validated_data):
+        return self.Meta.model.objects.get_or_create(**validated_data)[0]
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
@@ -112,10 +120,18 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
         return price
 
+    def create(self, validated_data, product=None):
+        partner = self.fields['partner'].create(
+            validated_data.pop('partner')
+        )
+        return self.Meta.model.objects.create(
+            product=product, partner=partner, **validated_data
+        )
+
 
 class MessageSerializer(serializers.ModelSerializer):
     availability = serializers.BooleanField()
-    stock = StockRecordSerializer(many=False, source="product")
+    stock = StockRecordSerializer(many=False)
     category_str = serializers.CharField()
     production_days = serializers.IntegerField(required=False)
     product_class = ProductClassSerializer(many=False)
@@ -183,3 +199,15 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def initial_product_class(self, field):
         return field.parser()
+
+    def create(self, validated_data):
+        validated_data.pop('availability')
+        stock_data = validated_data.pop('stock')
+        product_class = self.fields['product_class'].create(
+            validated_data.pop('product_class')
+        )
+        cat = create_from_breadcrumbs(validated_data.pop('category_str'))
+        item = self.Meta.model.objects.create(product_class=product_class, **validated_data)
+        ProductCategory.objects.create(product=item, category=cat)
+        self.fields['stock'].create(stock_data, product=item)
+        return item

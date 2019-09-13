@@ -20,10 +20,10 @@ class Converter(viewsets.ModelViewSet):
         self.file_name = self.file_mask.format(uuid.uuid4())
         super().__init__(*args, **kwargs)
 
-    def write(self, serializer):
-        with open(self.file_name, 'w', newline='') as csv_file:
-            writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(serializer.validated_data.values())
+    # def write(self, serializer):
+    #     with open(self.file_name, 'w', newline='') as csv_file:
+    #         writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    #         writer.writerow(serializer.validated_data.values())
 
     def get_data(self, update):
         text = update.channel_post.caption.strip()
@@ -38,7 +38,7 @@ class Converter(viewsets.ModelViewSet):
         if update.channel_post.chat_id == settings.CHAT_ID:
             serializer = self.get_serializer(data=self.get_data(update))
             serializer.is_valid(raise_exception=True)
-            self.write(serializer)
+            serializer.save()
             return Response(status=status.HTTP_201_CREATED)
 
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
