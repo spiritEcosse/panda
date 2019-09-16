@@ -191,14 +191,6 @@ class MessagesTest(TestCase):
         serializer.is_valid.assert_called_once_with(raise_exception=True)
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
-    def test_unique_file_name(self):
-        string = "unique_string"
-        mock_uuid = Mock(return_value=string)
-        with patch('panda.telegram_bot.views.uuid.uuid4', mock_uuid):
-            assert Converter().file_name == "{}.csv".format(string)
-
-        mock_uuid.assert_called_once_with()
-
 
 @pytest.mark.unit
 class ProductClassSerializerTest(TestCase):

@@ -8,6 +8,7 @@ TOKEN_TELEGRAM=622215110:AAGdb_eQSUFMvf52Vxz_UFfAV9w0fOcEKr4
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
+DJANGO_SETTINGS_MODULE=tests.settings
 
 # Celery
 # ------------------------------------------------------------------------------

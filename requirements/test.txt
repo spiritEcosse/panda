@@ -45,3 +45,6 @@ pytest-reorder==0.1.1 # https://github.com/not-raspberry/pytest_reorder
 
 # Mock for datetime.datetime
 freezegun==0.3.12 # https://github.com/spulec/freezegun/
+
+# Slug
+python-slugify==3.0.3 #https://github.com/un33k/python-slugify

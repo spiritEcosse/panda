@@ -6,9 +6,8 @@ from rest_framework import serializers
 
 Partner, StockRecord = get_classes('partner.models', ['Partner',
                                                       'StockRecord'])
-ProductClass, Product, Category, ProductCategory = get_classes(
-    'catalogue.models', ('ProductClass', 'Product', 'Category',
-                         'ProductCategory'))
+ProductClass, Product, ProductCategory = get_classes(
+    'catalogue.models', ('ProductClass', 'Product', 'ProductCategory'))
 create_from_breadcrumbs = get_class('catalogue.categories', 'create_from_breadcrumbs')
 
 

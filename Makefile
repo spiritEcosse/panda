@@ -41,7 +41,7 @@ build_django:
 commit: tagged_django_image
 	git add .
 	git commit -m '${COMMIT_MESSAGE}'
-	git branch --set-upstream-to=origin/`git rev-parse --abbrev-ref HEAD` `git rev-parse --abbrev-ref HEAD`
+	git branch --set-upstream-to=python-slugifyorigin/`git rev-parse --abbrev-ref HEAD` `git rev-parse --abbrev-ref HEAD`
 	git push
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
@@ -52,8 +52,8 @@ commit: tagged_django_image
 docker_build_push:
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
-	docker build -t ${REPO_TEST}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
-	docker push ${REPO_TEST}:`git rev-parse --abbrev-ref HEAD`_test
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
+	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`_test
 
 docker_pull:
 	docker pull ${REPO}:`git rev-parse --abbrev-ref HEAD`
@@ -188,6 +188,9 @@ coverage_unit:
 coverage_unit_html:
 	$(PYTEST) --cov=panda --cov-report=html -m unit
 
+tests_panda:
+	$(PYTEST) tests/panda/
+
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/
 	flake8 tests/
@@ -231,5 +234,5 @@ build_solr_schema:
 	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose build django && docker-compose run --rm django python manage.py build_solr_schema > schema.xml
 
 clean: ## Remove files not in source control
-	sudo find . -type f -name "*.pyc" -delete
-	sudo rm -rf nosetests.xml coverage.xml htmlcov *.egg-info *.pdf dist violations.txt
+	find . -type f -name "*.pyc" -delete
+	rm -rf nosetests.xml coverage.xml htmlcov *.egg-info *.pdf dist violations.txt

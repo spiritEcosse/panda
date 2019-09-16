@@ -336,3 +336,4 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 
 CHAT_ID = int(env("CHAT_ID"))
 TOKEN_TELEGRAM = env("TOKEN_TELEGRAM")
+OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"

@@ -1,6 +1,4 @@
-import csv
 import json
-import uuid
 
 from django.conf import settings
 from rest_framework import status
@@ -14,16 +12,6 @@ from panda.telegram_bot.serializers import MessageSerializer
 
 class Converter(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    file_mask = "{}.csv"
-
-    def __init__(self, *args, **kwargs):
-        self.file_name = self.file_mask.format(uuid.uuid4())
-        super().__init__(*args, **kwargs)
-
-    # def write(self, serializer):
-    #     with open(self.file_name, 'w', newline='') as csv_file:
-    #         writer = csv.writer(csv_file, quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    #         writer.writerow(serializer.validated_data.values())
 
     def get_data(self, update):
         text = update.channel_post.caption.strip()
