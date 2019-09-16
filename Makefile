@@ -41,7 +41,7 @@ build_django:
 commit: tagged_django_image
 	git add .
 	git commit -m '${COMMIT_MESSAGE}'
-	git branch --set-upstream-to=python-slugifyorigin/`git rev-parse --abbrev-ref HEAD` `git rev-parse --abbrev-ref HEAD`
+	git branch --set-upstream-to=origin/`git rev-parse --abbrev-ref HEAD` `git rev-parse --abbrev-ref HEAD`
 	git push
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
