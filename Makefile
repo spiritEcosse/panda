@@ -183,13 +183,13 @@ retest: venv ## Run failed tests only
 	$(PYTEST) --lf
 
 coverage_unit:
-	$(PYTEST) --cov=panda -m unit
+	$(PYTEST) --cov=panda -m unit tests/panda/
 
 coverage_unit_html:
-	$(PYTEST) --cov=panda --cov-report=html -m unit
+	$(PYTEST) --cov=panda --cov-report=html -m unit tests/panda/
 
-tests_panda:
-	$(PYTEST) tests/panda/
+coverage_panda_all:
+	$(PYTEST) --cov=panda tests/panda/
 
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/
@@ -236,3 +236,7 @@ build_solr_schema:
 clean: ## Remove files not in source control
 	find . -type f -name "*.pyc" -delete
 	rm -rf nosetests.xml coverage.xml htmlcov *.egg-info *.pdf dist violations.txt
+
+run_tests:
+	rm -fr tests/public/media/
+	$(PYTEST)
