@@ -15,7 +15,7 @@ class Converter(viewsets.ModelViewSet):
 
     def get_data(self, update):
         text = update.channel_post.caption.strip()
-        values = [value.strip() for value in text.split("\n") if value.strip() is not ""]
+        values = [value.strip() for value in text.split("\n\n") if value.strip() is not ""]
         return dict(zip(*(self.serializer_class.Meta.fields, values)))
 
     def create(self, request, *args, **kwargs):

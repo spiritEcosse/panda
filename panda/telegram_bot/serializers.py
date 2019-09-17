@@ -132,7 +132,6 @@ class MessageSerializer(serializers.ModelSerializer):
     availability = serializers.BooleanField()
     stock = StockRecordSerializer(many=False)
     category_str = serializers.CharField()
-    production_days = serializers.IntegerField(required=False)
     product_class = ProductClassSerializer(many=False)
 
     class Meta:

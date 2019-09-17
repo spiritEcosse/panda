@@ -185,6 +185,9 @@ retest: venv ## Run failed tests only
 coverage_unit:
 	$(PYTEST) --cov=panda -m unit tests/panda/
 
+panda_integration:
+	$(PYTEST) -m integration tests/panda/
+
 coverage_unit_html:
 	$(PYTEST) --cov=panda --cov-report=html -m unit tests/panda/
 

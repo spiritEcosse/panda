@@ -73,7 +73,6 @@ THIRD_PARTY_APPS = [
     'oscar.apps.checkout',
     'oscar.apps.address',
     'oscar.apps.shipping',
-    'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.partner',
     'oscar.apps.basket',
@@ -113,10 +112,10 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 LOCAL_APPS = [
-    # Your stuff: custom apps go here
+    "panda.catalogue",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------

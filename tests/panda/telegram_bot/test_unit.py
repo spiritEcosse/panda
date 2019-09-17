@@ -11,10 +11,11 @@ from panda.telegram_bot.serializers import MessageSerializer, StockRecordSeriali
 from panda.telegram_bot.views import Converter
 
 data_test_various_caption = (
-    ("title\navailability\nPrice: 100$\ndescription\ncategory_str>category_str",
+    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
-      "description": "description", "category_str": "category_str>category_str"}),
-    ("\n\n\r\ttitle\n\r\navailability\n\rPrice: 100$\n\t\rdescription\n\rcategory_str>category_str",
+      "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
+      "production_days": "production days: 10 days."}),
+    ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description", "category_str": "category_str>category_str"}),
 )
@@ -499,13 +500,14 @@ class MessageSerializerTest(TestCase):
             "title": "title",
             "availability": True,
             "category_str": "category_str",
+            "production_days": 10,
             'stock': {
                 "partner_sku": 12, 'partner': {"name": "name"}
             },
             "product_class": {"name": "name"}
         }
         validated_data = inp.copy()
-        exp = {"title": "title"}
+        exp = {"title": "title", "production_days": 10}
 
         with patch('panda.telegram_bot.serializers.StockRecordSerializer', order.stock_record):
             with patch('panda.telegram_bot.serializers.ProductClassSerializer', order.product_class):

@@ -1,10 +1,12 @@
 import pytest
 from django.test.utils import override_settings
 from django.urls import include, path, reverse
+from oscar.core.loading import get_classes
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
+
 from panda.telegram_bot.urls import router
-from oscar.core.loading import get_classes
+from tests.panda.telegram_bot.test_unit import data_test_various_caption
 
 Partner, StockRecord = get_classes('partner.models', ['Partner', 'StockRecord'])
 ProductClass, Product, ProductCategory, Category = get_classes(
@@ -22,19 +24,46 @@ class AccountTests(APITestCase, URLPatternsTestCase):
         Ensure we can create a new account object.
         """
         url = reverse("some-list")
-        data = {"update_id": 552201929, "channel_post": {"message_id": 78, "date": 1567772991, "chat": {"id": 10, "type": "channel", "title": "test_channel", "username": "test_channellllllllll"}, "entities": [], "caption_entities": [], "photo": [{"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgQ", "width": 320, "height": 90, "file_size": 9260}, {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3gAA87mAgABFgQ", "width": 800, "height": 225, "file_size": 46171}, {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3kAA8_mAgABFgQ", "width": 1280, "height": 360, "file_size": 104567}], "caption": "Наименование\nНа заказ\nЦена: 100$\nОписание\nКатегория>Подкатегория", "new_chat_members": [], "new_chat_photo": [], "delete_chat_photo": False, "group_chat_created": False, "supergroup_chat_created": False, "channel_chat_created": False}, "_effective_message": {"message_id": 78, "date": 1567772991, "chat": {"id": -1001241134985, "type": "channel", "title": "test_channel", "username": "test_channellllllllll"}, "entities": [], "caption_entities": [], "photo": [{"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgQ", "width": 320, "height": 90, "file_size": 9260}, {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3gAA87mAgABFgQ", "width": 800, "height": 225, "file_size": 46171}, {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3kAA8_mAgABFgQ", "width": 1280, "height": 360, "file_size": 104567}], "caption": "Кукла лисичка\n\nТип работы: в наличии, на заказ, для примера\n\nЦена-1000грн/300$\n\nОписание  Описание  Описание  Описание  Описание  Описание  Описание  Описание  Описание  Описание  Описание  Описание", "new_chat_members": [], "new_chat_photo": [], "delete_chat_photo": False, "group_chat_created": False, "supergroup_chat_created": False, "channel_chat_created": False}}
+        data = {"update_id": 552201929, "channel_post": {"message_id": 78, "date": 1567772991,
+                                                  "chat": {"id": 10, "type": "channel", "title": "test_channel",
+                                                           "username": "test_channellllllllll"}, "entities": [],
+                                                  "caption_entities": [], "photo": [
+                {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgQ", "width": 320, "height": 90,
+                 "file_size": 9260},
+                {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3gAA87mAgABFgQ", "width": 800, "height": 225,
+                 "file_size": 46171},
+                {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3kAA8_mAgABFgQ", "width": 1280, "height": 360,
+                 "file_size": 104567}],
+                                                  "caption": data_test_various_caption[0][0],
+                                                  "new_chat_members": [], "new_chat_photo": [],
+                                                  "delete_chat_photo": False, "group_chat_created": False,
+                                                  "supergroup_chat_created": False, "channel_chat_created": False},
+         "_effective_message": {"message_id": 78, "date": 1567772991,
+                                "chat": {"id": -1001241134985, "type": "channel", "title": "test_channel",
+                                         "username": "test_channellllllllll"}, "entities": [], "caption_entities": [],
+                                "photo": [{"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgQ",
+                                           "width": 320, "height": 90, "file_size": 9260},
+                                          {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3gAA87mAgABFgQ",
+                                           "width": 800, "height": 225, "file_size": 46171},
+                                          {"file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA3kAA8_mAgABFgQ",
+                                           "width": 1280, "height": 360, "file_size": 104567}],
+                                "caption": data_test_various_caption[0],
+                                "new_chat_members": [], "new_chat_photo": [], "delete_chat_photo": False,
+                                "group_chat_created": False, "supergroup_chat_created": False,
+                                "channel_chat_created": False}}
         response = self.client.post(url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        partner = Partner.objects.get(name="Категория partner")
-        product_class = ProductClass.objects.get(name="Категория")
+        partner = Partner.objects.get(name="Category_str partner")
+        product_class = ProductClass.objects.get(name="Category_str")
         product = Product.objects.get(
-            title="Наименование", product_class=product_class, description="Описание"
+            title="title", product_class=product_class, description="description\ndescription\ndescription",
+            production_days=10, slug="title"
         )
-        category = Category.objects.get(name="Подкатегория")
-        self.assertEqual(category.full_name, "Категория > Подкатегория")
+        category = Category.objects.get(name="Sub_category_str")
+        self.assertEqual(category.full_name, "Category_str > Sub_category_str")
         ProductCategory.objects.get(product=product, category=category)
         StockRecord.objects.get(
             product=product, partner=partner, price_excl_tax=100, partner_sku=product.upc,
-            num_in_stock=1
+            num_in_stock=0
         )
