@@ -3,8 +3,6 @@ import os
 from config.settings.base import *  # noqa
 from config.settings.base import env
 
-from oscar.defaults import *  # noqa
-
 # Path helper
 location = lambda x: os.path.join(
     os.path.dirname(os.path.realpath(__file__)), x)
@@ -158,4 +156,4 @@ OSCAR_LINE_STATUS_PIPELINE = {'a': ('b', ), 'b': ()}
 SECRET_KEY = 'notverysecret'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 FIXTURE_DIRS = [location('unit/fixtures')]
-OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
+# OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
