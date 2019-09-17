@@ -6,9 +6,32 @@ from rest_framework import serializers
 
 Partner, StockRecord = get_classes('partner.models', ['Partner',
                                                       'StockRecord'])
-ProductClass, Product, ProductCategory = get_classes(
-    'catalogue.models', ('ProductClass', 'Product', 'ProductCategory'))
+ProductClass, Product, ProductCategory, ProductImage = get_classes(
+    'catalogue.models', ('ProductClass', 'Product', 'ProductCategory', "ProductImage"))
 create_from_breadcrumbs = get_class('catalogue.categories', 'create_from_breadcrumbs')
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ('original', )
+
+    def __init__(self, *args, **kwargs):
+        self.parsed_data = kwargs.get('data', {})
+        super().__init__(*args, **kwargs)
+
+    def parser(self):
+        data = {}
+        for field in self.fields.values():
+            if field.required:
+                initial = getattr(self, 'initial_' + field.field_name, None)
+
+                if initial:
+                    data[field.field_name] = initial()
+        return data
+
+    def parse_original(self, _, value):
+        return value.download(self.parsed_data['stock']['partner_sku'])
 
 
 class ProductClassSerializer(serializers.ModelSerializer):
@@ -133,11 +156,12 @@ class MessageSerializer(serializers.ModelSerializer):
     stock = StockRecordSerializer(many=False)
     category_str = serializers.CharField()
     product_class = ProductClassSerializer(many=False)
+    image = ProductImageSerializer(many=False, required=True)
 
     class Meta:
         model = Product
         fields = ['title', "availability", 'stock', 'description', "category_str",
-                  "production_days", "product_class", "upc"]
+                  "production_days", "product_class", "upc", "image"]
         extra_kwargs = {
             'title': {'required': True},
             'availability': {'required': True},

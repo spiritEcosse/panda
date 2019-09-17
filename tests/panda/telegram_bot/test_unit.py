@@ -14,10 +14,10 @@ data_test_various_caption = (
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
-      "production_days": "production days: 10 days."}),
+      "production_days": "production days: 10 days.", "image": "some"}),
     ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
-      "description": "description", "category_str": "category_str>category_str"}),
+      "description": "description", "category_str": "category_str>category_str", "image": "some"}),
 )
 
 data_test_various_price = (
@@ -82,6 +82,9 @@ def test_parse_category_str(inp, exp):
 def test_validate_caption(inp, exp):
     update = Mock()
     update.channel_post.caption = inp
+    file_ = Mock()
+    file_.get_file.return_value= "some"
+    update.channel_post.photo = [file_]
     converter = Converter()
     assert converter.get_data(update) == exp
 
@@ -440,14 +443,14 @@ class MessageSerializerTest(TestCase):
 
     def test_required_fields(self):
         self.assertListEqual(
-            ['title', "availability", 'stock', 'description', "category_str", "product_class", "upc"],
+            ['title', "availability", 'stock', 'description', "category_str", "product_class", "upc", "image"],
             [field.field_name for field in self.s.fields.values() if field.required]
         )
 
     def test_order_fields(self):
         self.assertListEqual(
             ['title', "availability", 'stock', 'description', "category_str",
-             "production_days", "product_class", "upc"],
+             "production_days", "product_class", "upc", "image"],
             self.s.Meta.fields
         )
 
