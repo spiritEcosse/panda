@@ -47,7 +47,9 @@ commit: tagged_django_image
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`_test
-	#curl -X POST http://127.0.0.1:8094/job/panda/build?token=hRvyQqWEkbPUQrWwskihxmcBWirNFhnwdUITxhpJQbRjuUIKYPILhYQuVRegKzzN --user "igor:1111" -H "`wget -q --auth-no-challenge --user igor --password 1111 --output-document - 'http://127.0.0.1:8094/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'`"
+
+commitr:
+	./commit.sh
 
 docker_build_push:
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f ${DOCKER_FILE} .
