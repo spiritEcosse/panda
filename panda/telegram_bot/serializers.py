@@ -1,6 +1,10 @@
 import datetime
+import os
 import re
 
+from PIL import Image
+from django.conf import settings
+from django.core.files import File
 from oscar.core.loading import get_classes, get_class
 from rest_framework import serializers
 
@@ -20,18 +24,41 @@ class ProductImageSerializer(serializers.ModelSerializer):
         self.parsed_data = kwargs.get('data', {})
         super().__init__(*args, **kwargs)
 
-    def parser(self):
+    def parser(self, value):
         data = {}
         for field in self.fields.values():
-            if field.required:
+            #ToDo replace on https://www.django-rest-framework.org/api-guide/validators/#class-based
+            parse_method = getattr(self, 'parse_' + field.field_name, None)
+            field.parsed_data = self.parsed_data
+
+            if parse_method:
+                data[field.field_name] = parse_method(field, value)
+            elif field.required:
                 initial = getattr(self, 'initial_' + field.field_name, None)
 
                 if initial:
-                    data[field.field_name] = initial()
+                    data[field.field_name] = initial(field)
         return data
 
     def parse_original(self, _, value):
-        return value.download(self.parsed_data['stock']['partner_sku'])
+        file_path = settings.TELEGRAM_FORMAT_IMAGE_FILE.format(
+            self.parsed_data['stock']['partner_sku']
+        )
+
+        if value.download(file_path):
+            trial_image = Image.open(file_path)
+            trial_image.verify()
+            return File(open(file_path, 'rb'))
+
+    def create(self, validated_data, product=None):
+        original = validated_data.pop('original')
+        im = self.Meta.model(product=product, **validated_data)
+        file_name = original.name.split('/')[-1]
+        im.original.save(file_name, original, save=False)
+        im.save()
+
+        if not settings.TELEGRAM_HOLD_IMAGE_FILE:
+            os.remove(original.name)
 
 
 class ProductClassSerializer(serializers.ModelSerializer):
@@ -222,9 +249,13 @@ class MessageSerializer(serializers.ModelSerializer):
     def initial_product_class(self, field):
         return field.parser()
 
+    def parse_image(self, field, value):
+        return field.parser(value)
+
     def create(self, validated_data):
         validated_data.pop('availability')
         stock_data = validated_data.pop('stock')
+        image = validated_data.pop('image')
         product_class = self.fields['product_class'].create(
             validated_data.pop('product_class')
         )
@@ -232,4 +263,5 @@ class MessageSerializer(serializers.ModelSerializer):
         item = self.Meta.model.objects.create(product_class=product_class, **validated_data)
         ProductCategory.objects.create(product=item, category=cat)
         self.fields['stock'].create(stock_data, product=item)
+        self.fields['image'].create(image, product=item)
         return item

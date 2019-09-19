@@ -1,4 +1,8 @@
+import os
+
 import pytest
+from django.conf import settings
+from django.core.files import File
 from django.test.utils import override_settings
 from django.urls import include, path, reverse
 from oscar.core.loading import get_classes
@@ -19,6 +23,7 @@ class AccountTests(APITestCase, URLPatternsTestCase):
     ]
 
     @override_settings(CHAT_ID=10)
+    @override_settings(TELEGRAM_HOLD_IMAGE_FILE=True)
     def test_create_account(self):
         """
         Ensure we can create a new account object.
@@ -81,4 +86,8 @@ class AccountTests(APITestCase, URLPatternsTestCase):
             product=product, partner=partner, price_excl_tax=100, partner_sku=product.upc,
             num_in_stock=0
         )
-        # ProductImage.objects.get(product=product, original=File())
+        product_image = ProductImage.objects.get(product=product)
+        file_path = settings.TELEGRAM_FORMAT_IMAGE_FILE.format(product.upc)
+        with File(open(file_path, 'rb')) as image:
+            self.assertEqual(product_image.original.read(), image.read())
+        os.remove(file_path)

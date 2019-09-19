@@ -241,5 +241,5 @@ clean: ## Remove files not in source control
 	rm -rf nosetests.xml coverage.xml htmlcov *.egg-info *.pdf dist violations.txt
 
 run_tests:
-	rm -fr tests/public/media/
+	rm -fr tests/public/media/products/
 	$(PYTEST)
