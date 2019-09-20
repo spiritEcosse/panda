@@ -339,4 +339,4 @@ media/
 #.envs/*
 #!.envs/.local/
 src
-
+jenkins-cli.jar
