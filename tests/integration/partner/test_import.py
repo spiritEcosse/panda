@@ -5,7 +5,7 @@ import logging
 
 from oscar.apps.partner.importers import CatalogueImporter
 from oscar.apps.partner.exceptions import ImportingError
-from oscar.apps.catalogue.models import ProductClass, Product
+from panda.catalogue.models import ProductClass, Product
 from oscar.apps.partner.models import Partner
 from oscar.test.factories import create_product
 

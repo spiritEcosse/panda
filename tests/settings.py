@@ -3,8 +3,6 @@ import os
 from config.settings.base import *  # noqa
 from config.settings.base import env
 
-from oscar.defaults import *  # noqa
-
 # Path helper
 location = lambda x: os.path.join(
     os.path.dirname(os.path.realpath(__file__)), x)
@@ -22,12 +20,14 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
 
+    "panda.catalogue",
+
     'oscar',
     'oscar.apps.analytics',
     'oscar.apps.checkout',
     'oscar.apps.address',
     'oscar.apps.shipping',
-    'oscar.apps.catalogue',
+    # 'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.partner',
     'oscar.apps.basket',
@@ -69,7 +69,7 @@ INSTALLED_APPS = [
 # doing this on a per-test basis, so I'm using a global change.
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.partner')] = 'tests._site.apps.partner'
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.customer')] = 'tests._site.apps.customer'
-INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.catalogue')] = 'tests._site.apps.catalogue'
+INSTALLED_APPS[INSTALLED_APPS.index('panda.catalogue')] = 'tests._site.apps.catalogue'
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.dashboard')] = 'tests._site.apps.dashboard'
 
 AUTH_USER_MODEL = 'myauth.User'
@@ -142,6 +142,8 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 PUBLIC_ROOT = location('public')
 MEDIA_ROOT = os.path.join(PUBLIC_ROOT, 'media')
+TELEGRAM_MEDIA = os.path.join(MEDIA_ROOT, 'images')
+TELEGRAM_FORMAT_IMAGE_FILE=TELEGRAM_MEDIA + "/{}.jpg"
 DEBUG = False
 SITE_ID = 1
 USE_TZ = 1
@@ -158,3 +160,5 @@ OSCAR_LINE_STATUS_PIPELINE = {'a': ('b', ), 'b': ()}
 SECRET_KEY = 'notverysecret'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 FIXTURE_DIRS = [location('unit/fixtures')]
+OSCAR_SLUG_FUNCTION = 'oscar.core.utils.default_slugifier'
+OSCAR_DEFAULT_CURRENCY='GBP'

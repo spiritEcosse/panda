@@ -73,7 +73,6 @@ THIRD_PARTY_APPS = [
     'oscar.apps.checkout',
     'oscar.apps.address',
     'oscar.apps.shipping',
-    'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.partner',
     'oscar.apps.basket',
@@ -113,10 +112,10 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 LOCAL_APPS = [
-    # Your stuff: custom apps go here
+    "panda.catalogue",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
@@ -333,3 +332,15 @@ INSTALLED_APPS += ["compressor"]
 STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+CHAT_ID = int(env("CHAT_ID"))
+TOKEN_TELEGRAM = env("TOKEN_TELEGRAM")
+HASH = env("HASH")
+OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
+OSCAR_SLUG_ALLOW_UNICODE=False
+
+TELEGRAM_MEDIA = os.path.join(MEDIA_ROOT, 'images')
+TELEGRAM_FORMAT_IMAGE_FILE=TELEGRAM_MEDIA + "/{}.jpg"
+TELEGRAM_HOLD_IMAGE_FILE=False
+OSCAR_DEFAULT_CURRENCY='UAH'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

@@ -2,10 +2,7 @@ version: '3'
 
 services:
   django: &django
-    build:
-      context: .
-      dockerfile: ./compose/test/django/Dockerfile
-    image: panda_test_django
+    image: shevchenkoigor/panda:master_test
     restart: on-failure
     depends_on:
       - postgres
@@ -41,7 +38,7 @@ services:
 
   celeryworker:
     <<: *django
-    image: panda_test_celeryworker
+    image: shevchenkoigor/panda:master_test
     depends_on:
       - redis
       - postgres
@@ -51,7 +48,7 @@ services:
 
   celerybeat:
     <<: *django
-    image: panda_test_celerybeat
+    image: shevchenkoigor/panda:master_test
     depends_on:
       - redis
       - postgres
@@ -61,7 +58,7 @@ services:
 
   flower:
     <<: *django
-    image: panda_test_flower
+    image: shevchenkoigor/panda:master_test
     ports:
       - "5552:5555"
     command: /start-flower

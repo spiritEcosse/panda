@@ -7,10 +7,7 @@ volumes:
 
 services:
   django: &django
-    build:
-      context: .
-      dockerfile: ./compose/local/django/Dockerfile
-    image: panda_local_django
+    image: shevchenkoigor/panda:master
     restart: on-failure
     depends_on:
       - postgres
@@ -25,6 +22,7 @@ services:
       - ./.envs/.local/.postgres
     ports:
       - "8000:8000"
+      - "443:8000"
     command: /start
 
   postgres:
@@ -50,7 +48,7 @@ services:
 
   celeryworker:
     <<: *django
-    image: panda_local_celeryworker
+    image: shevchenkoigor/panda:master
     depends_on:
       - redis
       - postgres
@@ -60,7 +58,7 @@ services:
 
   celerybeat:
     <<: *django
-    image: panda_local_celerybeat
+    image: shevchenkoigor/panda:master
     depends_on:
       - redis
       - postgres
@@ -70,7 +68,7 @@ services:
 
   flower:
     <<: *django
-    image: panda_local_flower
+    image: shevchenkoigor/panda:master
     ports:
       - "5554:5555"
     command: /start-flower
@@ -119,8 +117,9 @@ services:
       - ./panda/media:/app/sandbox/public/media/
     user: root
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.initial_data/.postgres
+      - ./.envs/.initial_data/.django
     command: bash -c "cd /app && make sandbox"
     depends_on:
       - postgres
+      - django

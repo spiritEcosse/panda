@@ -8,7 +8,7 @@ from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.contrib.auth.models import AnonymousUser
 
-from oscar.apps.catalogue.models import ProductClass, Product
+from panda.catalogue.models import ProductClass, Product
 from oscar.apps.checkout import calculators
 from oscar.apps.offer.utils import Applicator
 from oscar.apps.order.models import Order

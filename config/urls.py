@@ -5,6 +5,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views import defaults as default_views
 
+from panda.telegram_bot.urls import router
+
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     # path(
@@ -20,6 +22,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('admin/', admin.site.urls),
     path('', include(apps.get_app_config('oscar').urls[0])),
+    path('telegram_bot/', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

@@ -37,3 +37,14 @@ pysolr==3.8.1 # https://pypi.org/project/pysolr/
 # Tests
 django-webtest==1.9.7
 easy-thumbnails==2.5
+pytest-cov==2.7.1
+
+# Order
+pytest-ordering==0.6 # https://github.com/ftobia/pytest-ordering
+pytest-reorder==0.1.1 # https://github.com/not-raspberry/pytest_reorder
+
+# Mock for datetime.datetime
+freezegun==0.3.12 # https://github.com/spulec/freezegun/
+
+# Slug
+python-slugify==3.0.3 #https://github.com/un33k/python-slugify

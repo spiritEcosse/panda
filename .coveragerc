@@ -1,5 +1,5 @@
 [run]
 include = panda/*
-omit = *migrations*, *tests*
+omit = *migrations*, *tests*, *.html
 plugins =
     django_coverage_plugin
