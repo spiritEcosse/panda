@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from oscar.apps.catalogue.models import (Product, ProductClass,
+from panda.catalogue.models import (Product, ProductClass,
                                          ProductAttribute,
                                          AttributeOption,
                                          ProductRecommendation)

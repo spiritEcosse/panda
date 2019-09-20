@@ -335,9 +335,12 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 
 CHAT_ID = int(env("CHAT_ID"))
 TOKEN_TELEGRAM = env("TOKEN_TELEGRAM")
-# OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
+HASH = env("HASH")
+OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
 OSCAR_SLUG_ALLOW_UNICODE=False
 
 TELEGRAM_MEDIA = os.path.join(MEDIA_ROOT, 'images')
 TELEGRAM_FORMAT_IMAGE_FILE=TELEGRAM_MEDIA + "/{}.jpg"
 TELEGRAM_HOLD_IMAGE_FILE=False
+OSCAR_DEFAULT_CURRENCY='UAH'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

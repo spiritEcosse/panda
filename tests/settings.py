@@ -69,7 +69,7 @@ INSTALLED_APPS = [
 # doing this on a per-test basis, so I'm using a global change.
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.partner')] = 'tests._site.apps.partner'
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.customer')] = 'tests._site.apps.customer'
-# INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.catalogue')] = 'tests._site.apps.catalogue'
+INSTALLED_APPS[INSTALLED_APPS.index('panda.catalogue')] = 'tests._site.apps.catalogue'
 INSTALLED_APPS[INSTALLED_APPS.index('oscar.apps.dashboard')] = 'tests._site.apps.dashboard'
 
 AUTH_USER_MODEL = 'myauth.User'
@@ -160,4 +160,5 @@ OSCAR_LINE_STATUS_PIPELINE = {'a': ('b', ), 'b': ()}
 SECRET_KEY = 'notverysecret'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 FIXTURE_DIRS = [location('unit/fixtures')]
-# OSCAR_SLUG_FUNCTION="panda.core.utils.slugify"
+OSCAR_SLUG_FUNCTION = 'oscar.core.utils.default_slugifier'
+OSCAR_DEFAULT_CURRENCY='GBP'

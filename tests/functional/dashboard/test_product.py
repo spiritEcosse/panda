@@ -11,7 +11,7 @@ from oscar.test import factories
 from oscar.test.testcases import WebTestCase
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
-from oscar.apps.catalogue.models import Product, ProductAttribute
+from panda.catalogue.models import Product, ProductAttribute
 from oscar.test.factories import (
     CategoryFactory, ProductFactory, ProductAttributeFactory,
     ProductClassFactory)

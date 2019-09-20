@@ -19,12 +19,12 @@ class TestClassLoading(TestCase):
 
     def test_load_oscar_classes_correctly(self):
         Product, Category = get_classes('catalogue.models', ('Product', 'Category'))
-        self.assertEqual('oscar.apps.catalogue.models', Product.__module__)
+        self.assertEqual('panda.catalogue.models', Product.__module__)
         self.assertEqual('oscar.apps.catalogue.models', Category.__module__)
 
     def test_load_oscar_class_correctly(self):
         Product = get_class('catalogue.models', 'Product')
-        self.assertEqual('oscar.apps.catalogue.models', Product.__module__)
+        self.assertEqual('panda.catalogue.models', Product.__module__)
 
     def test_load_oscar_class_from_dashboard_subapp(self):
         ReportForm = get_class('dashboard.reports.forms', 'ReportForm')

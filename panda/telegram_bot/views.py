@@ -24,7 +24,6 @@ class Converter(viewsets.ModelViewSet):
         bot = Bot(settings.TOKEN_TELEGRAM)
         update = Update.de_json(json.loads(request.body), bot)
 
-        # ToDo replace on wrapper
         if update.channel_post.chat_id == settings.CHAT_ID:
             serializer = self.get_serializer(data=self.get_data(update))
             serializer.is_valid(raise_exception=True)

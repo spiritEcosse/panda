@@ -15,6 +15,10 @@ data_test_various_caption = (
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
       "production_days": "production days: 10 days.", "image": "some"}),
+    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str",
+     {"title": "title", "availability": "availability", "stock": "Price: 100$",
+      "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
+      "image": "some"}),
     ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description", "category_str": "category_str>category_str", "image": "some"}),
@@ -171,7 +175,6 @@ class MessagesTest(TestCase):
     #     csv_writer = mock_csv_writer()
     #     csv_writer.writerow.assert_called_once_with(validated_data)
 
-    @override_settings(CHAT_ID=10)
     def test_create(self):
         my_data = {"my": "data"}
         loads, bot, serializer, update, request, get_data, status, response = \
@@ -484,19 +487,6 @@ class MessageSerializerTest(TestCase):
                 call(self.s, 'parse_' + not_required_not_have_initial.field_name, None),
             ]
         )
-
-    # def test_required_fields(self):
-    #     self.assertListEqual(
-    #         ['title', "availability", 'stock', 'description', "category_str", "product_class", "upc", "image"],
-    #         [field.field_name for field in self.s.fields.values() if field.required]
-    #     )
-
-    # def test_order_fields(self):
-    #     self.assertListEqual(
-    #         ['title', "availability", 'stock', 'description', "category_str",
-    #          "production_days", "product_class", "upc", "image"],
-    #         self.s.Meta.fields
-    #     )
 
     def test_parse_stock(self):
         self.s.parsed_data = {}

@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from oscar.apps.catalogue.models import Category
+from panda.catalogue.models import Category
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.templatetags.category_tags import get_annotated_list
 

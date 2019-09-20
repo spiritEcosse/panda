@@ -202,8 +202,8 @@ lint: ## Run flake8 and isort checks
 	isort -q --recursive --diff src/
 	isort -q --recursive --diff tests/
 
-test_migrations: install-migrations-testing-requirements ## Tests migrations
-	cd sandbox && ./test_migrations.sh
+test_migrations: ## Tests migrations
+	./test_migrations.sh
 
 
 # Solr
