@@ -47,8 +47,6 @@ commit: tagged_django_image
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 	docker push ${REPO}:`git rev-parse --abbrev-ref HEAD`_test
-
-commitr:
 	./commit.sh
 
 docker_build_push:
