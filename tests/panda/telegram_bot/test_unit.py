@@ -196,7 +196,7 @@ class MessagesTest(TestCase):
         get_data.assert_called_once_with(update())
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
-        serializer.is_valid.assert_called_once_with(raise_exception=True)
+        serializer.is_valid.assert_called_once_with(raise_exception=False)
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
 
