@@ -30,7 +30,7 @@ pipeline {
         }
         stage("Reload services") {
             steps {
-                sh "ssh igor@panda_production 'sudo supervisorctl restart panda:'"
+                sh "ssh igor@panda_production 'sudo supervisorctl stop panda: && kill -9 `ps aux | grep /home/igor/.virtualenvs/panda/bin/gunicorn | awk '{ print $2 }'` && sudo supervisorctl start panda:'"
             }
         }
     }

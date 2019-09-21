@@ -19,7 +19,7 @@ data_test_various_caption = (
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
       "image": "some"}),
-    ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
+    ("\n\n\r\ttitle\n\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description", "category_str": "category_str>category_str", "image": "some"}),
 )
@@ -32,6 +32,7 @@ data_test_various_price = (
     ("Price:100$ / 50€", "100"),
     ("Price:  100$  / 50€", "100"),
     ("Price:  100.90", "100.90"),
+    ("Price-100.90", "100.90"),
     ("Wrong price.", ""),
 )
 
@@ -292,7 +293,7 @@ class StockRecordSerializerTest(TestCase):
         with patch('panda.telegram_bot.serializers.re.match', mock_re):
             assert self.s.parse_price_excl_tax(Mock(), value) == ""
 
-        mock_re.assert_called_once_with(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
+        mock_re.assert_called_once_with(r".*[:-]+\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
 
     def test_initial_partner(self):
         field = Mock()

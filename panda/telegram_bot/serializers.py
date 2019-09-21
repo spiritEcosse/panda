@@ -159,7 +159,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
         return field.parser()
 
     def parse_price_excl_tax(self, _, value):
-        match = re.match(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
+        match = re.match(r".*[:-]+\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
 
         try:
             hundredths = match.group("hundredths") or ""

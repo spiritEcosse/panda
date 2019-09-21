@@ -26,7 +26,8 @@ class Converter(viewsets.ModelViewSet):
 
         if update.channel_post.chat_id == settings.CHAT_ID:
             serializer = self.get_serializer(data=self.get_data(update))
-            serializer.is_valid(raise_exception=True)
+            if not serializer.is_valid(raise_exception=False):
+                raise Exception(serializer.errors, serializer.data)
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
 
