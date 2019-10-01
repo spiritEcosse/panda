@@ -38,11 +38,7 @@ services:
 
   celeryworker:
     <<: *django
-<<<<<<< HEAD
     image: shevchenkoigor/panda:telegram_bot_test
-=======
-    image: shevchenkoigor/panda:telegram_bot_test
->>>>>>> master
     depends_on:
       - redis
       - postgres
@@ -52,11 +48,7 @@ services:
 
   celerybeat:
     <<: *django
-<<<<<<< HEAD
     image: shevchenkoigor/panda:telegram_bot_test
-=======
-    image: shevchenkoigor/panda:telegram_bot_test
->>>>>>> master
     depends_on:
       - redis
       - postgres
@@ -66,11 +58,7 @@ services:
 
   flower:
     <<: *django
-<<<<<<< HEAD
     image: shevchenkoigor/panda:telegram_bot_test
-=======
-    image: shevchenkoigor/panda:telegram_bot_test
->>>>>>> master
     ports:
       - "5552:5555"
     command: /start-flower
