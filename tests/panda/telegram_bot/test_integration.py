@@ -10,7 +10,7 @@ from oscar.core.loading import get_classes
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
 
-from panda.telegram_bot.serializers import MessageSerializer
+from panda.telegram_bot.serializers import MessageSerializer, ProductImageSerializer
 from panda.telegram_bot.urls import router
 from tests.panda.telegram_bot.test_unit import data_test_various_caption
 
@@ -127,4 +127,22 @@ class MessageSerializerTest(TestCase):
             ['title', "availability", 'stock', 'description', "category_str",
              "production_days", "product_class", "upc", "image"],
             self.s.Meta.fields
+        )
+
+
+@pytest.mark.integration
+class ProductImageSerializerTest(TestCase):
+    def setUp(self):
+        self.s = ProductImageSerializer()
+
+    def test_order_fields(self):
+        self.assertTupleEqual(
+            ('original', ),
+            self.s.Meta.fields
+        )
+
+    def test_required_fields(self):
+        self.assertTupleEqual(
+            ('original', ),
+            tuple((field.field_name for field in self.s.fields.values() if field.required))
         )

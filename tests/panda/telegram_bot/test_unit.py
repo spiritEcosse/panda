@@ -1,10 +1,10 @@
-from freezegun import freeze_time
 import datetime
 from unittest import TestCase
-from unittest.mock import patch, Mock, MagicMock, call
+from unittest.mock import patch, Mock, MagicMock, call, mock_open
 
 import pytest
 from django.test.utils import override_settings
+from freezegun import freeze_time
 
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
@@ -14,14 +14,14 @@ data_test_various_caption = (
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
-      "production_days": "production days: 10 days.", "image": "some"}),
+      "production_days": "production days: 10 days.", "image": {'original': 'some'},}),
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
-      "image": "some"}),
+      "image": {'original': 'some'},}),
     ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
-      "description": "description", "category_str": "category_str>category_str", "image": "some"}),
+      "description": "description", "category_str": "category_str>category_str", "image": {'original': 'some'}}),
 )
 
 data_test_various_price = (
@@ -130,6 +130,49 @@ def test_partner_name(inp, exp):
     assert ps.initial_name() == exp
 
 
+class CommonSerializerTest(TestCase):
+    __test__ = False
+
+    def setUp(self):
+        self.s = None
+
+    def test_parser(self):
+        inp = {"have_parse": "in_data", "not_have_parse": "in_data"}
+        exp = {
+            "have_parse": 1,
+            "not_have_parse": "in_data",
+            "is_required_have_initial": 2,
+        }
+        have_parse, not_have_parse, is_required_have_initial, not_required_not_have_initial = \
+            Mock(), Mock(), Mock(), Mock()
+        mock_getattr = Mock(
+            side_effect=[lambda *args: 1, None, None, lambda *args: 2, None]
+        )
+        common = {"read_only": False, "write_only": False, "default": False, "source": ""}
+        have_parse.configure_mock(**common, **{'required': True, "field_name": "have_parse"})
+        not_have_parse.configure_mock(**common, **{'required': False, "field_name": 'not_have_parse'})
+        is_required_have_initial.configure_mock(**common, **{'required': True, "field_name": 'is_required_have_initial'})
+        not_required_not_have_initial.configure_mock(**common, **{'required': False, "field_name": 'not_required_not_have_initial'})
+        self.s.fields = Mock()
+        self.s.fields.values.return_value = [have_parse, not_have_parse, is_required_have_initial, not_required_not_have_initial]
+        self.s.fields.items.return_value = []
+
+        with patch('panda.telegram_bot.serializers.getattr', mock_getattr):
+            self.s.parser(inp)
+            self.assertDictEqual(exp, inp)
+
+        self.assertListEqual(
+            list(mock_getattr.mock_calls),
+            [
+                call(self.s, 'parse_' + have_parse.field_name, None),
+                call(self.s, 'parse_' + not_have_parse.field_name, None),
+                call(self.s, 'parse_' + is_required_have_initial.field_name, None),
+                call(self.s, 'initial_' + is_required_have_initial.field_name, None),
+                call(self.s, 'parse_' + not_required_not_have_initial.field_name, None),
+            ]
+        )
+
+
 @pytest.mark.unit
 class MessagesTest(TestCase):
 
@@ -196,6 +239,7 @@ class MessagesTest(TestCase):
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
         serializer.is_valid.assert_called_once_with(raise_exception=True)
+        serializer.save.assert_called_once_with()
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
 
@@ -392,29 +436,67 @@ class PartnerSerializerTest(TestCase):
         self.assertEqual(self.s.create(validated_data), partner)
         self.s.Meta.model.objects.get_or_create.assert_called_once_with(**validated_data)
 
+
 @pytest.mark.unit
-class ProductImageSerializerTest(TestCase):
+class ProductImageSerializerTest(CommonSerializerTest):
 
     def setUp(self):
         self.s = ProductImageSerializer()
+        self.order, self.product = Mock(), Mock()
+        self.order.product_image_model, self.order.os = Mock(), Mock()
+        self.order.meta = self.s.Meta = Mock()
+        self.order.meta.model.return_value = self.order.product_image_model
 
-    def test_parser(self):
-        pass
-
-    def test_required_fields(self):
-        self.assertTupleEqual(
-            ('original', ),
-            tuple((field.field_name for field in self.s.fields.values() if field.required))
-        )
-
-    def test_order_fields(self):
-        self.assertTupleEqual(
-            ('original', ),
-            self.s.Meta.fields
-        )
-
+    @override_settings(TELEGRAM_HOLD_IMAGE_FILE=False)
     def test_create(self):
-        pass
+        self.file = Mock()
+        file_name = ["name_file.jpg"]
+        self.file.name.split.return_value = file_name
+        inp = {
+            "original": self.file,
+        }
+        exp = {}
+        validated_data = inp.copy()
+
+        with patch('panda.telegram_bot.serializers.ProductImage', self.order.product_image):
+            with patch('panda.telegram_bot.serializers.os', self.order.os):
+                self.s.create(validated_data, self.product)
+                self.assertDictEqual(exp, validated_data)
+
+        self.assertListEqual(
+            self.order.mock_calls,
+            [
+                call.meta.model(product=self.product, **validated_data),
+                call.product_image_model.original.save(file_name[-1], inp['original'], save=False),
+                call.product_image_model.save(),
+                call.os.remove(inp['original'].name)
+            ]
+        )
+
+    @override_settings(TELEGRAM_FORMAT_IMAGE_FILE="media/images/{}.jpg")
+    def test_parse_original(self):
+        file_path = "media/images/12345.jpg"
+        self.s.parsed_data = {'stock': {'partner_sku': "12345"}}
+        self.order, self.value, self.open_file = Mock(), Mock(), Mock()
+        self.order.image, self.order.file, self.order.mo, self.open_image = Mock(), Mock(), Mock(), Mock()
+        self.order.mo.return_value = self.open_file
+        self.order.image.open.return_value = self.order.open_image
+        self.value.download.return_value = True
+
+        with patch('panda.telegram_bot.serializers.Image', self.order.image):
+            with patch('panda.telegram_bot.serializers.open', self.order.mo):
+                with patch('panda.telegram_bot.serializers.File', self.order.file):
+                    self.s.parse_original(Mock(), self.value)
+
+        self.assertListEqual(
+            self.order.mock_calls,
+            [
+                call.image.open(file_path),
+                call.open_image.verify(),
+                call.mo(file_path, 'rb'),
+                call.file(self.open_file),
+            ]
+        )
 
 
 @pytest.mark.unit
@@ -476,7 +558,7 @@ class MessageSerializerTest(TestCase):
                 self.assertDictEqual(exp, inp)
 
         super_ = super_()
-        super_.to_internal_value.assert_called_once_with(inp)
+        super_.to_internal_value.assert_called_once_with(exp)
         self.assertListEqual(
             list(mock_getattr.mock_calls),
             [
@@ -496,6 +578,12 @@ class MessageSerializerTest(TestCase):
         field.field_name = "stock"
         self.assertDictEqual(self.s.parse_stock(field, ""), data)
         self.assertDictEqual(self.s.parsed_data, {"stock": data})
+
+    def test_parse_image(self):
+        field = Mock()
+        value = "file"
+        self.s.parse_image(field, value)
+        field.parser.assert_called_once_with(value)
 
     def test_initial_upc(self):
         self.s.parsed_data['stock'] = {'partner_sku': 121212}

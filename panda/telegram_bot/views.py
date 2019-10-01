@@ -17,7 +17,8 @@ class Converter(viewsets.ModelViewSet):
         text = update.channel_post.caption.strip()
         values = [value.strip() for value in text.split("\n\n") if value.strip() is not ""]
         data = dict(zip(*(self.serializer_class.Meta.fields, values)))
-        data['image'] = update.channel_post.photo[-1].get_file()
+        data['image'] = {}
+        data['image']['original'] = update.channel_post.photo[-1].get_file()
         return data
 
     def create(self, request, *args, **kwargs):

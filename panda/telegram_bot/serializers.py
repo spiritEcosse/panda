@@ -15,30 +15,32 @@ ProductClass, Product, ProductCategory, ProductImage = get_classes(
 create_from_breadcrumbs = get_class('catalogue.categories', 'create_from_breadcrumbs')
 
 
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ('original', )
-
+class CommonSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         self.parsed_data = kwargs.get('data', {})
         super().__init__(*args, **kwargs)
 
-    def parser(self, value):
-        data = {}
+    def parser(self, data):
         for field in self.fields.values():
             #ToDo replace on https://www.django-rest-framework.org/api-guide/validators/#class-based
             parse_method = getattr(self, 'parse_' + field.field_name, None)
             field.parsed_data = self.parsed_data
 
-            if parse_method:
-                data[field.field_name] = parse_method(field, value)
+            if field.field_name in data:
+                if parse_method:
+                    data[field.field_name] = parse_method(field, data[field.field_name])
             elif field.required:
                 initial = getattr(self, 'initial_' + field.field_name, None)
 
                 if initial:
                     data[field.field_name] = initial(field)
         return data
+
+
+class ProductImageSerializer(CommonSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ('original', )
 
     def parse_original(self, _, value):
         file_path = settings.TELEGRAM_FORMAT_IMAGE_FILE.format(
@@ -178,7 +180,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
         )
 
 
-class MessageSerializer(serializers.ModelSerializer):
+class MessageSerializer(CommonSerializer):
     availability = serializers.BooleanField()
     stock = StockRecordSerializer(many=False)
     category_str = serializers.CharField()
@@ -198,26 +200,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'upc': {'required': True},
         }
 
-    def __init__(self, *args, **kwargs):
-        self.parsed_data = kwargs.get('data', {})
-        super().__init__(*args, **kwargs)
-
     def to_internal_value(self, data):
-        for field in self.fields.values():
-            #ToDo replace on https://www.django-rest-framework.org/api-guide/validators/#class-based
-            parse_method = getattr(self, 'parse_' + field.field_name, None)
-            field.parsed_data = self.parsed_data
-
-            if field.field_name in data:
-                if parse_method:
-                    data[field.field_name] = parse_method(field, data[field.field_name])
-            elif field.required:
-                initial = getattr(self, 'initial_' + field.field_name, None)
-
-                if initial:
-                    data[field.field_name] = initial(field)
-
-        return super().to_internal_value(data)
+        return super().to_internal_value(self.parser(data))
 
     def initial_upc(self, *args):
         return self.parsed_data['stock']['partner_sku']
