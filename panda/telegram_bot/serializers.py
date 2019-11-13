@@ -190,7 +190,7 @@ class MessageSerializer(CommonSerializer):
     class Meta:
         model = Product
         fields = ['title', "availability", 'stock', 'description', "category_str",
-                  "production_days", "product_class", "upc", "image"]
+                  "production_days", "product_class", "upc", "image", "media_group_id"]
         extra_kwargs = {
             'title': {'required': True},
             'availability': {'required': True},
@@ -249,3 +249,4 @@ class MessageSerializer(CommonSerializer):
         self.fields['stock'].create(stock_data, product=item)
         self.fields['image'].create(image, product=item)
         return item
+

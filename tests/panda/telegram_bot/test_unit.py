@@ -9,20 +9,29 @@ from freezegun import freeze_time
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
 from panda.telegram_bot.views import Converter
-
 data_test_various_caption = (
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
-      "production_days": "production days: 10 days.", "image": {'original': 'some'},}),
+      "production_days": "production days: 10 days.", "image": {'original': 'some'},
+      "media_group_id": "12345"
+      }
+     ),
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
-      "image": {'original': 'some'},}),
+      "image": {'original': 'some'},
+      "media_group_id": "12345"
+     }
+     ),
     ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
-      "description": "description", "category_str": "category_str>category_str", "image": {'original': 'some'}}),
+      "description": "description", "category_str": "category_str>category_str", "image": {'original': 'some'},
+      "media_group_id": "12345"
+      }
+    ),
 )
+
 
 data_test_various_price = (
     ("Цена: 100$", "100"),
@@ -89,6 +98,7 @@ def test_validate_caption(inp, exp):
     file_ = Mock()
     file_.get_file.return_value= "some"
     update.channel_post.photo = [file_]
+    update.channel_post.media_group_id = "12345"
     converter = Converter()
     assert converter.get_data(update) == exp
 
@@ -238,7 +248,7 @@ class MessagesTest(TestCase):
         get_data.assert_called_once_with(update())
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
-        serializer.is_valid.assert_called_once_with(raise_exception=True)
+        serializer.is_valid.assert_called_once_with(raise_exception=False)
         serializer.save.assert_called_once_with()
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 

@@ -14,8 +14,6 @@ services:
     env_file:
       - ./.envs/.test/.django
       - ./.envs/.test/.postgres
-    ports:
-      - "8012:8000"
     command: /start
 
   postgres:
@@ -23,15 +21,11 @@ services:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: test_panda_postgres
-    ports:
-      - 5436:5432
     env_file:
       - ./.envs/.test/.postgres
 
   mailhog:
     image: mailhog/mailhog:v1.0.0
-    ports:
-      - "8023:8025"
 
   redis:
     image: redis:5.0
@@ -59,8 +53,6 @@ services:
   flower:
     <<: *django
     image: shevchenkoigor/panda:telegram_bot_test
-    ports:
-      - "5552:5555"
     command: /start-flower
 
   node:
@@ -75,13 +67,6 @@ services:
       # http://jdlm.info/articles/2016/03/06/lessons-building-node-app-docker.html
       - /app/node_modules
     command: npm run dev
-    ports:
-      - "3001:3000"
-      # Expose browsersync UI: https://www.browsersync.io/docs/options/#option-ui
-      - "3002:3001"
 
   elasticsearch:
     image: elasticsearch:2
-    ports:
-      - "9201:9200"
-      - "9301:9300"

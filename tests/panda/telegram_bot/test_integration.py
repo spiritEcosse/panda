@@ -29,6 +29,7 @@ class TelegramViewsTests(APITestCase, URLPatternsTestCase):
             "update_id": 552201929,
             "channel_post": {
                 "message_id": 78,
+                "media_group_id": "12559467035666010",
                 "date": 1567772991,
                 "chat": {
                     "id": 10,
@@ -80,7 +81,7 @@ class TelegramViewsTests(APITestCase, URLPatternsTestCase):
         product_class = ProductClass.objects.get(name="Category_str")
         product = Product.objects.get(
             title="title", product_class=product_class, description="description\ndescription\ndescription",
-            production_days=10, slug="title"
+            production_days=10, slug="title", media_group_id="12559467035666010"
         )
         category = Category.objects.get(name="Sub_category_str")
         self.assertEqual(category.full_name, "Category_str > Sub_category_str")
@@ -125,7 +126,7 @@ class MessageSerializerTest(TestCase):
     def test_order_fields(self):
         self.assertListEqual(
             ['title', "availability", 'stock', 'description', "category_str",
-             "production_days", "product_class", "upc", "image"],
+             "production_days", "product_class", "upc", "image", "media_group_id"],
             self.s.Meta.fields
         )
 
