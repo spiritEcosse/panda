@@ -174,6 +174,9 @@ install-migrations-testing-requirements: ## Install migrations testing requireme
 ##################
 # Tests and checks
 ##################
+stop_rm:
+	export COMPOSE_FILE=test.yml && docker-compose stop && docker-compose rm -f
+
 #test: venv ## Run tests
 test:
 	docker-compose -f test.yml run --rm django $(PYTEST)
