@@ -14,10 +14,13 @@ makemessages:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py makemessages -a
 
 compilemessages:
-	docker-compose exec django ./manage.py compilemessages
+	export COMPOSE_FILE=${COMPOSE_FILE} \
+	&& docker-compose exec django ./manage.py compilemessages
 
 migrate:
-	docker-compose exec django ./manage.py makemigrations && docker-compose exec django ./manage.py migrate
+	export COMPOSE_FILE=${COMPOSE_FILE} \
+	&& docker-compose run --rm django ./manage.py makemigrations \
+	&& docker-compose run --rm django ./manage.py migrate
 
 shell:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py shell
@@ -29,7 +32,10 @@ tests:
 	docker-compose -f ${COMPOSE_FILE} run --rm django tests
 
 deploy_hard:
-	export COMPOSE_FILE=${COMPOSE_FILE} && docker-compose stop && docker-compose rm -f && docker-compose up --build --remove-orphans --scale initial-data=0
+	export COMPOSE_FILE=${COMPOSE_FILE} \
+	&& docker-compose stop \
+	&& docker-compose rm -f \
+	&& docker-compose up --build --remove-orphans --scale initial-data=0
 
 tagged_django_image:
 	sed -i "s%panda:.*%panda:`git rev-parse --abbrev-ref HEAD`%g" ${COMPOSE_FILE}
@@ -179,7 +185,7 @@ stop_rm:
 
 #test: venv ## Run tests
 test:
-	docker-compose -f test.yml run --rm django $(PYTEST)
+	docker-compose -f test.yml -p test run --rm django $(PYTEST)
 
 retest: venv ## Run failed tests only
 	$(PYTEST) --lf
@@ -187,8 +193,8 @@ retest: venv ## Run failed tests only
 coverage_unit:
 	$(PYTEST) --cov=panda -m unit tests/panda/
 
-panda_integration:
-	$(PYTEST) -m integration tests/panda/
+tests_panda_integration:
+	docker-compose -f test.yml -p test run --rm django $(PYTEST) -m integration tests/panda/
 
 coverage_unit_html:
 	$(PYTEST) --cov=panda --cov-report=html -m unit tests/panda/
