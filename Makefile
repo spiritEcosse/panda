@@ -155,7 +155,7 @@ bash:
 	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
 bash_test:
-	docker-compose -f ${COMPOSE_FILE} -p ${PROJECT} run --rm django sh
+	docker-compose -f test.yml -p test run --rm django sh
 
 sh:
 	docker-compose -f ${COMPOSE_FILE} run --rm django sh
@@ -188,10 +188,10 @@ test:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST)
 
 retest: venv ## Run failed tests only
-	$(PYTEST) --lf
+	docker-compose -f test.yml -p test run --rm django $(PYTEST) --lf
 
 coverage_unit:
-	$(PYTEST) --cov=panda -m unit tests/panda/
+	docker-compose -f test.yml -p test run --rm django $(PYTEST) --cov=panda -m unit tests/panda/
 
 tests_panda_integration:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) -m integration tests/panda/

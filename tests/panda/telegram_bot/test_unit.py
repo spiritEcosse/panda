@@ -1,14 +1,16 @@
 import datetime
 from unittest import TestCase
-from unittest.mock import patch, Mock, MagicMock, call, mock_open
+from unittest.mock import patch, Mock, MagicMock, call
 
 import pytest
+from django.conf import settings
 from django.test.utils import override_settings
 from freezegun import freeze_time
 
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
 from panda.telegram_bot.views import Converter
+
 data_test_various_caption = (
     ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
@@ -230,27 +232,63 @@ class MessagesTest(TestCase):
 
     def test_create(self):
         my_data = {"my": "data"}
-        loads, bot, serializer, update, request, get_data, status, response = \
+        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, get_data_image, \
+            update = \
             Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock()
-        update.channel_post.chat_id = 10
+            Mock(), Mock(), Mock(return_value=False), Mock(), Mock()
+        update_bot_obj.channel_post.chat_id = 10
         status.HTTP_201_CREATED = 201
         self.converter.get_data = get_data
         self.converter.get_serializer = serializer
-        update = Mock(return_value=update)
+        self.converter.get_object = get_object
+        self.converter.get_data_image = get_data_image
+        self.converter.update = update
+        update_bot = Mock(return_value=update_bot_obj)
 
         with patch('panda.telegram_bot.views.Bot', bot):
             with patch('panda.telegram_bot.views.json.loads', loads):
-                with patch('panda.telegram_bot.views.Update.de_json', update):
+                with patch('panda.telegram_bot.views.Update.de_json', update_bot):
                     with patch('panda.telegram_bot.views.Response', response):
                         self.converter.create(request)
 
-        get_data.assert_called_once_with(update())
+        bot.assert_called_once_with(settings.TOKEN_TELEGRAM)
+        loads.assert_called_once_with(request.body)
+        update_bot.assert_called_once_with(loads(), bot())
+        get_object.assert_called_once_with(update=update_bot())
+        get_data.assert_called_once_with(update_bot())
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
         serializer.is_valid.assert_called_once_with(raise_exception=False)
         serializer.save.assert_called_once_with()
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
+
+    def test_create_update(self):
+        my_data = {"my": "data"}
+        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, get_data_image, \
+            update = \
+            Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
+            Mock(), Mock(), Mock(return_value=True), Mock(), Mock()
+        update_bot_obj.channel_post.chat_id = 10
+        status.HTTP_200_OK = 200
+        self.converter.get_data = get_data
+        self.converter.get_serializer = serializer
+        self.converter.get_object = get_object
+        self.converter.get_data_image = get_data_image
+        self.converter.update = update
+        update_bot = Mock(return_value=update_bot_obj)
+
+        with patch('panda.telegram_bot.views.Bot', bot):
+            with patch('panda.telegram_bot.views.json.loads', loads):
+                with patch('panda.telegram_bot.views.Update.de_json', update_bot):
+                    with patch('panda.telegram_bot.views.Response', response):
+                        self.converter.create(request)
+
+        bot.assert_called_once_with(settings.TOKEN_TELEGRAM)
+        loads.assert_called_once_with(request.body)
+        update_bot.assert_called_once_with(loads(), bot())
+        get_object.assert_called_once_with(update=update_bot())
+        update.assert_called_once_with(request, update=update_bot())
+        response.assert_called_once_with(status=status.HTTP_200_OK)
 
 
 @pytest.mark.unit

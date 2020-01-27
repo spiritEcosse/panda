@@ -5,7 +5,7 @@ IPYTHONDIR=/app/.ipython
 CHAT_ID=10
 TOKEN_TELEGRAM=622215110:AAGdb_eQSUFMvf52Vxz_UFfAV9w0fOcEKr4
 HASH=MhaGIyBCjuxZaavLfv8nDuNM2uZI2WY1
-DJANGO_SETTINGS_MODULE=config.settings.test
+DJANGO_SETTINGS_MODULE=tests.settings
 
 # Redis
 # ------------------------------------------------------------------------------
