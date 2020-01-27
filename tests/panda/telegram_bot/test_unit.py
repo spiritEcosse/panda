@@ -296,6 +296,22 @@ class MessagesTest(TestCase):
         self.converter.update(request, kwargs)
         self.assertListEqual(order.mock_calls, common + [call.serializer.save()])
 
+    def test_get_object(self):
+        channel_post = Mock(**{'media_group_id': 1})
+        order, update = Mock(), Mock(**{'channel_post': channel_post})
+        obj = Mock()
+        model = Mock(**{'objects': {'get.return_value': obj}})
+        meta = Mock(**{'model': model})
+        order.serializer_class = Mock(**{'Meta': meta})
+
+        self.converter.serializer_class = order.serializer_class
+        self.converter.get_object(update=update)
+
+        common = [
+            call.serializer_class.Meta.model.objects.get(media_group_id=update.channel_post.media_group_id)
+        ]
+        self.assertEqual(obj, self.assertListEqual(order.mock_calls, common))
+
 
 @pytest.mark.unit
 class ProductClassSerializerTest(TestCase):
