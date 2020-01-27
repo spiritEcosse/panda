@@ -1,6 +1,7 @@
 import json
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -30,13 +31,11 @@ class Converter(viewsets.ModelViewSet):
         return data
 
     def get_object(self, **kwargs):
-        update = kwargs['update']
-
         try:
             return self.serializer_class.Meta.model.objects.get(
-                media_group_id=update.channel_post.media_group_id
+                **{self.lookup_field: kwargs['update'].channel_post.media_group_id}
             )
-        except self.serializer_class.Meta.model.DoesNotExist:
+        except ObjectDoesNotExist:
             pass
 
     def update(self, request, *args, **kwargs):

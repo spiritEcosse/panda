@@ -7,7 +7,7 @@ from django.conf import settings
 from django.test.utils import override_settings
 from freezegun import freeze_time
 from rest_framework.serializers import ValidationError
-
+from django.core.exceptions import ObjectDoesNotExist
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
 from panda.telegram_bot.views import Converter
@@ -298,19 +298,23 @@ class MessagesTest(TestCase):
 
     def test_get_object(self):
         channel_post = Mock(**{'media_group_id': 1})
-        order, update = Mock(), Mock(**{'channel_post': channel_post})
-        obj = Mock()
-        model = Mock(**{'objects': {'get.return_value': obj}})
+        obj, order, update = Mock(), Mock(), Mock(**{'channel_post': channel_post})
+        objects = Mock(**{'get.return_value': obj})
+        model = Mock(**{'objects': objects})
         meta = Mock(**{'model': model})
         order.serializer_class = Mock(**{'Meta': meta})
-
-        self.converter.serializer_class = order.serializer_class
-        self.converter.get_object(update=update)
-
         common = [
             call.serializer_class.Meta.model.objects.get(media_group_id=update.channel_post.media_group_id)
         ]
-        self.assertEqual(obj, self.assertListEqual(order.mock_calls, common))
+        self.converter.serializer_class = order.serializer_class
+
+        self.converter.get_object(update=update)
+        self.assertListEqual(order.mock_calls, common)
+
+        order.mock_calls = []
+        objects.get.side_effect = ObjectDoesNotExist
+        self.converter.get_object(update=update)
+        self.assertListEqual(order.mock_calls, common)
 
 
 @pytest.mark.unit
