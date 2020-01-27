@@ -2,7 +2,7 @@
 PORT_WEB?=8000
 COMPOSE_FILE?=local.yml
 PORT_DB?=5432
-PROJECT?=test_panda
+PROJECT?=test
 COMMIT_MESSAGE?=
 REPO=shevchenkoigor/panda
 REPO_TEST=shevchenkoigor/panda_test

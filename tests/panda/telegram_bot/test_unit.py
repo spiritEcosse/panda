@@ -307,14 +307,25 @@ class MessagesTest(TestCase):
             call.serializer_class.Meta.model.objects.get(media_group_id=update.channel_post.media_group_id)
         ]
         self.converter.serializer_class = order.serializer_class
+        kw = {'update': update}
 
-        self.assertEqual(obj, self.converter.get_object(update=update))
+        self.assertEqual(obj, self.converter.get_object(**kw))
         self.assertListEqual(order.mock_calls, common)
 
         order.mock_calls = []
         objects.get.side_effect = ObjectDoesNotExist
-        self.assertEqual(None, self.converter.get_object(update=update))
+        self.assertEqual(None, self.converter.get_object(**kw))
         self.assertListEqual(order.mock_calls, common)
+
+    def test_get_data_image(self):
+        file_ = Mock()
+        photo = Mock(**{'get_file.return_value': file_})
+        channel_post = Mock(**{'photo': [photo]})
+        update = Mock(**{'channel_post': channel_post})
+        kw = {'update': update}
+        self.assertDictEqual({'image': {'original': file_}}, self.converter.get_data_image(**kw))
+        photo.get_file.assert_called_once_with()
+
 
 @pytest.mark.unit
 class ProductClassSerializerTest(TestCase):
