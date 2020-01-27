@@ -4,6 +4,7 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from telegram import Bot
 from telegram.update import Update
 
@@ -30,9 +31,13 @@ class Converter(viewsets.ModelViewSet):
 
     def get_object(self, **kwargs):
         update = kwargs['update']
-        return self.serializer_class.Meta.model.objects.filter(
-            media_group_id=update.channel_post.media_group_id
-        )
+
+        try:
+            return self.serializer_class.Meta.model.objects.get(
+                media_group_id=update.channel_post.media_group_id
+            )
+        except self.serializer_class.Meta.model.DoesNotExist:
+            pass
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object(**kwargs)
@@ -41,7 +46,7 @@ class Converter(viewsets.ModelViewSet):
         )
 
         if not serializer.is_valid(raise_exception=False):
-            raise Exception(serializer.errors, serializer.data)
+            raise ValidationError(serializer.errors, serializer.data)
         serializer.save()
 
     def create(self, request, *args, **kwargs):

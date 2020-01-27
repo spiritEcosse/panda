@@ -6,6 +6,7 @@ import pytest
 from django.conf import settings
 from django.test.utils import override_settings
 from freezegun import freeze_time
+from rest_framework.serializers import ValidationError
 
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
@@ -212,36 +213,17 @@ class MessagesTest(TestCase):
         update.assert_called_once_with(loads(), bot())
         response.assert_called_once_with(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # def test_write(self):
-    #     mo = mock_open()
-    #     mock_csv_writer = MagicMock()
-    #     serializer = MagicMock()
-    #     validated_data = [1, 2]
-    #     serializer.validated_data.values.return_value = validated_data
-    #     file_name = "unique-string"
-    #     self.converter.file_name = file_name
-    #
-    #     with patch('panda.telegram_bot.views.open', mo):
-    #         with patch('panda.telegram_bot.views.csv.writer', mock_csv_writer):
-    #             self.converter.write(serializer)
-    #
-    #     mo.assert_called_once_with(file_name, 'w', newline='')
-    #     mock_csv_writer.assert_called_once_with(mo(), quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    #     csv_writer = mock_csv_writer()
-    #     csv_writer.writerow.assert_called_once_with(validated_data)
-
     def test_create(self):
         my_data = {"my": "data"}
-        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, get_data_image, \
+        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, \
             update = \
             Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock(), Mock(return_value=False), Mock(), Mock()
+            Mock(), Mock(), Mock(return_value=False), Mock()
         update_bot_obj.channel_post.chat_id = 10
         status.HTTP_201_CREATED = 201
         self.converter.get_data = get_data
         self.converter.get_serializer = serializer
         self.converter.get_object = get_object
-        self.converter.get_data_image = get_data_image
         self.converter.update = update
         update_bot = Mock(return_value=update_bot_obj)
 
@@ -264,16 +246,15 @@ class MessagesTest(TestCase):
 
     def test_create_update(self):
         my_data = {"my": "data"}
-        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, get_data_image, \
+        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, \
             update = \
             Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock(), Mock(return_value=True), Mock(), Mock()
+            Mock(), Mock(), Mock(return_value=True), Mock()
         update_bot_obj.channel_post.chat_id = 10
         status.HTTP_200_OK = 200
         self.converter.get_data = get_data
         self.converter.get_serializer = serializer
         self.converter.get_object = get_object
-        self.converter.get_data_image = get_data_image
         self.converter.update = update
         update_bot = Mock(return_value=update_bot_obj)
 
@@ -289,6 +270,31 @@ class MessagesTest(TestCase):
         get_object.assert_called_once_with(update=update_bot())
         update.assert_called_once_with(request, update=update_bot())
         response.assert_called_once_with(status=status.HTTP_200_OK)
+
+    def test_update(self):
+        order, request, instance, get_data_image = Mock(), Mock(), Mock(), Mock()
+        order.serializer = Mock(**{'save.return_value': Mock(), 'is_valid.return_value': False})
+        self.converter.get_object = order.get_object = Mock(return_value=instance)
+        self.converter.get_serializer = order.get_serializer = Mock(return_value=order.serializer)
+        self.converter.get_data_image = order.get_data_image = Mock(return_value=get_data_image)
+        kwargs = {}
+        common = [
+            call.get_object(**kwargs),
+            call.get_data_image(**kwargs),
+            call.get_serializer(instance, data=get_data_image, partial=True),
+            call.serializer.is_valid(raise_exception=False)
+        ]
+
+        with self.assertRaises(ValidationError):
+            self.converter.update(request, kwargs)
+
+        self.assertListEqual(order.mock_calls, common)
+
+        order.mock_calls = []
+        order.serializer.is_valid.return_value = True
+
+        self.converter.update(request, kwargs)
+        self.assertListEqual(order.mock_calls, common + [call.serializer.save()])
 
 
 @pytest.mark.unit
