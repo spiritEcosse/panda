@@ -308,14 +308,13 @@ class MessagesTest(TestCase):
         ]
         self.converter.serializer_class = order.serializer_class
 
-        self.converter.get_object(update=update)
+        self.assertEqual(obj, self.converter.get_object(update=update))
         self.assertListEqual(order.mock_calls, common)
 
         order.mock_calls = []
         objects.get.side_effect = ObjectDoesNotExist
-        self.converter.get_object(update=update)
+        self.assertEqual(None, self.converter.get_object(update=update))
         self.assertListEqual(order.mock_calls, common)
-
 
 @pytest.mark.unit
 class ProductClassSerializerTest(TestCase):
