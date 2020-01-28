@@ -30,7 +30,6 @@ data_test_various_caption = (
     ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description", "category_str": "category_str>category_str", "image": {'original': 'some'},
-      "media_group_id": "12345"
       }
     ),
 )
@@ -101,7 +100,7 @@ def test_validate_caption(inp, exp):
     file_ = Mock()
     file_.get_file.return_value= "some"
     update.channel_post.photo = [file_]
-    update.channel_post.media_group_id = "12345"
+    update.channel_post.media_group_id = exp.get('media_group_id', None)
     converter = Converter()
     assert converter.get_data(update) == exp
 
@@ -272,7 +271,7 @@ class MessagesTest(TestCase):
         response.assert_called_once_with(status=status.HTTP_200_OK)
 
     def test_update(self):
-        order, request, instance, get_data_image = Mock(), Mock(), Mock(), Mock()
+        order, request, instance, get_data_image, update = Mock(), Mock(), Mock(), Mock(), Mock()
         order.serializer = Mock(**{'save.return_value': Mock(), 'is_valid.return_value': False})
         self.converter.get_object = order.get_object = Mock(return_value=instance)
         self.converter.get_serializer = order.get_serializer = Mock(return_value=order.serializer)
@@ -297,23 +296,32 @@ class MessagesTest(TestCase):
         self.assertListEqual(order.mock_calls, common + [call.serializer.save()])
 
     def test_get_object(self):
-        channel_post = Mock(**{'media_group_id': 1})
-        obj, order, update = Mock(), Mock(), Mock(**{'channel_post': channel_post})
+        obj, order, update = Mock(), Mock(), Mock()
         objects = Mock(**{'get.return_value': obj})
         model = Mock(**{'objects': objects})
         meta = Mock(**{'model': model})
-        order.serializer_class = Mock(**{'Meta': meta})
+        media_group_id = 1
+        self.converter.get_media_group_id = order.get_media_group_id = Mock(return_value=media_group_id)
+        self.converter.serializer_class = order.serializer_class = Mock(**{'Meta': meta})
         common = [
-            call.serializer_class.Meta.model.objects.get(media_group_id=update.channel_post.media_group_id)
+            call.get_media_group_id(update=update)
         ]
-        self.converter.serializer_class = order.serializer_class
         kw = {'update': update}
 
         self.assertEqual(obj, self.converter.get_object(**kw))
-        self.assertListEqual(order.mock_calls, common)
+        self.assertListEqual(order.mock_calls, common + [
+            call.serializer_class.Meta.model.objects.get(media_group_id=media_group_id)
+        ])
 
         order.mock_calls = []
         objects.get.side_effect = ObjectDoesNotExist
+        self.assertEqual(None, self.converter.get_object(**kw))
+        self.assertListEqual(order.mock_calls, common + [
+            call.serializer_class.Meta.model.objects.get(media_group_id=media_group_id)
+        ])
+
+        order.mock_calls = []
+        order.get_media_group_id.return_value = None
         self.assertEqual(None, self.converter.get_object(**kw))
         self.assertListEqual(order.mock_calls, common)
 

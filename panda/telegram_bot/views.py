@@ -20,7 +20,8 @@ class Converter(viewsets.ModelViewSet):
         text = update.channel_post.caption.strip()
         values = [value.strip() for value in text.split("\n\n") if value.strip() is not ""]
         data = dict(zip(*(self.serializer_class.Meta.fields, values)))
-        data['media_group_id'] = update.channel_post.media_group_id
+        if self.get_media_group_id(update=update):
+            data['media_group_id'] = self.get_media_group_id(update=update)
         data.update(self.get_data_image(update=update))
         return data
 
@@ -30,11 +31,17 @@ class Converter(viewsets.ModelViewSet):
         data['image']['original'] = kwargs['update'].channel_post.photo[-1].get_file()
         return data
 
+    def get_media_group_id(self, **kwargs):
+        return getattr(kwargs['update'].channel_post, 'media_group_id', None)
+
     def get_object(self, **kwargs):
+        update = kwargs['update']
         try:
-            return self.serializer_class.Meta.model.objects.get(
-                **{self.lookup_field: kwargs['update'].channel_post.media_group_id}
-            )
+            media_group_id = self.get_media_group_id(update=update)
+            if media_group_id:
+                return self.serializer_class.Meta.model.objects.get(
+                    **{self.lookup_field: media_group_id}
+                )
         except ObjectDoesNotExist:
             pass
 
