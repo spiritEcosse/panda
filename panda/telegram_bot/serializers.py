@@ -43,9 +43,7 @@ class ProductImageSerializer(CommonSerializer):
         fields = ('original', )
 
     def parse_original(self, _, value):
-        file_path = settings.TELEGRAM_FORMAT_IMAGE_FILE.format(
-            self.parsed_data['stock']['partner_sku']
-        )
+        file_path = settings.TELEGRAM_FORMAT_IMAGE_FILE.format(value.file_id)
 
         if value.download(file_path):
             trial_image = Image.open(file_path)
@@ -250,3 +248,16 @@ class MessageSerializer(CommonSerializer):
         self.fields['image'].create(image, product=item)
         return item
 
+
+class MessageImageSerializer(MessageSerializer):
+    class Meta:
+        model = Product
+        fields = ["image"]
+        extra_kwargs = {
+            'image': {'required': True},
+        }
+
+    def update(self, instance, validated_data):
+        image = validated_data.pop('image')
+        self.fields['image'].create(image, product=instance)
+        return instance

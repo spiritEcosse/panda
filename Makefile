@@ -78,8 +78,14 @@ rm_hard: stop_rm rm_volumes
 deploy:
 	docker-compose -f ${COMPOSE_FILE} up --scale initial-data=0
 
+rm_image_test:
+	docker image rm -f ${REPO}:`git rev-parse --abbrev-ref HEAD`_test
+
 build_local:
 	docker build -t panda:`git rev-parse --abbrev-ref HEAD` -f compose/local/django/Dockerfile .
+
+build_test: rm_image_test
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 
 deploy_build:
 	docker-compose -f ${COMPOSE_FILE} up --build --scale initial-data=0
@@ -184,23 +190,23 @@ stop_rm:
 	export COMPOSE_FILE=test.yml && docker-compose stop && docker-compose rm -f
 
 #test: venv ## Run tests
-test:
+tests:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST)
 
 retest: venv ## Run failed tests only
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) --lf
 
-coverage_unit:
+tests_unit:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) --cov=panda -m unit tests/panda/
 
-tests_panda_integration:
+tests_integration:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) -m integration tests/panda/
 
-coverage_unit_html:
+tests_unit_coverage_html:
 	$(PYTEST) --cov=panda --cov-report=html -m unit tests/panda/
 
-coverage_panda_all:
-	$(PYTEST) --cov=panda tests/panda/
+tests_all_coverage:
+	docker-compose -f test.yml -p test run --rm django $(PYTEST) --cov=panda tests/panda/
 
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/

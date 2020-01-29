@@ -530,7 +530,7 @@ class PartnerSerializerTest(TestCase):
 
 
 @pytest.mark.unit
-class ProductImageSerializerTest(CommonSerializerTest):
+class ProductImageSerializerTest(TestCase):
 
     def setUp(self):
         self.s = ProductImageSerializer()
@@ -567,26 +567,28 @@ class ProductImageSerializerTest(CommonSerializerTest):
 
     @override_settings(TELEGRAM_FORMAT_IMAGE_FILE="media/images/{}.jpg")
     def test_parse_original(self):
-        file_path = "media/images/12345.jpg"
-        self.s.parsed_data = {'stock': {'partner_sku': "12345"}}
-        self.order, self.value, self.open_file = Mock(), Mock(), Mock()
-        self.order.image, self.order.file, self.order.mo, self.open_image = Mock(), Mock(), Mock(), Mock()
+        file_name = "12345"
+        file_path = "media/images/{}.jpg".format(file_name)
+        self.order, self.open_file = Mock(), Mock()
+        self.order.value = value = Mock(file_id=file_name)
+        self.order.image, self.order.file, self.order.mo, self.open_image = \
+            Mock(**{'open.return_value': self.order.open_image}), Mock(), Mock(), Mock()
         self.order.mo.return_value = self.open_file
-        self.order.image.open.return_value = self.order.open_image
-        self.value.download.return_value = True
+        value.download.return_value = True
 
         with patch('panda.telegram_bot.serializers.Image', self.order.image):
             with patch('panda.telegram_bot.serializers.open', self.order.mo):
                 with patch('panda.telegram_bot.serializers.File', self.order.file):
-                    self.s.parse_original(Mock(), self.value)
+                    self.s.parse_original(Mock(), value)
 
         self.assertListEqual(
             self.order.mock_calls,
             [
+                call.value.download(file_path),
                 call.image.open(file_path),
                 call.open_image.verify(),
                 call.mo(file_path, 'rb'),
-                call.file(self.open_file),
+                call.file(self.open_file)
             ]
         )
 

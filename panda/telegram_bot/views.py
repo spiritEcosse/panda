@@ -9,19 +9,31 @@ from rest_framework.serializers import ValidationError
 from telegram import Bot
 from telegram.update import Update
 
-from panda.telegram_bot.serializers import MessageSerializer
+from panda.telegram_bot import serializers
 
 
 class Converter(viewsets.ModelViewSet):
-    serializer_class = MessageSerializer
+    serializer_class = serializers.MessageSerializer
     lookup_field = "media_group_id"
+
+    def __init__(self, *args, **kwargs):
+        self.update_image = False
+        super().__init__(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.update_image:
+            return serializers.MessageImageSerializer
+        return super().get_serializer_class()
 
     def get_data(self, update):
         text = update.channel_post.caption.strip()
         values = [value.strip() for value in text.split("\n\n") if value.strip() is not ""]
         data = dict(zip(*(self.serializer_class.Meta.fields, values)))
-        if self.get_media_group_id(update=update):
-            data['media_group_id'] = self.get_media_group_id(update=update)
+        media_group_id = self.get_media_group_id(update=update)
+
+        if media_group_id:
+            data['media_group_id'] = media_group_id
+
         data.update(self.get_data_image(update=update))
         return data
 
@@ -36,6 +48,7 @@ class Converter(viewsets.ModelViewSet):
 
     def get_object(self, **kwargs):
         update = kwargs['update']
+
         try:
             media_group_id = self.get_media_group_id(update=update)
             if media_group_id:
@@ -47,6 +60,7 @@ class Converter(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object(**kwargs)
+        self.update_image = True
         serializer = self.get_serializer(
             instance, data=self.get_data_image(**kwargs), partial=True
         )
