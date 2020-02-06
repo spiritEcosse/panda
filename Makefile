@@ -267,3 +267,6 @@ clean: ## Remove files not in source control
 run_tests:
 	rm -fr tests/public/media/products/
 	$(PYTEST)
+
+deploy_prod:
+	java -jar jenkins-cli.jar -s http://127.0.0.1:8094/ build panda
