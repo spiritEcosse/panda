@@ -38,6 +38,8 @@ pysolr==3.8.1 # https://pypi.org/project/pysolr/
 django-webtest==1.9.7
 easy-thumbnails==2.5
 pytest-cov==2.7.1
+tox==3.14
+tox-pyenv==1.1.0
 
 # Order
 pytest-ordering==0.6 # https://github.com/ftobia/pytest-ordering

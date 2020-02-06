@@ -84,7 +84,10 @@ rm_image_test:
 build_local:
 	docker build -t panda:`git rev-parse --abbrev-ref HEAD` -f compose/local/django/Dockerfile .
 
-build_test: rm_image_test
+build_test:
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
+
+build_test_hard: rm_image_test
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 
 deploy_build:
@@ -126,7 +129,6 @@ initial_data_reupd: initial_data_stop_rm
 	docker-compose -f ${COMPOSE_FILE} up -d initial-data
 
 #install: initial-data deploy_build
-install: deploy_build
 
 collectstatic:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ./manage.py collectstatic --noinput
@@ -177,11 +179,10 @@ django_populate_countries:
 
 PYTEST = py.test
 
-venv: ## Install test requirements
-	docker-compose -f ${COMPOSE_FILE} -p ${PROJECT} run django pip install -r docs/requirements.txt
+##################
+# Install commands
+##################
 
-install-migrations-testing-requirements: ## Install migrations testing requirements
-	pip install -r requirements_migrations.txt
 
 ##################
 # Tests and checks
@@ -189,8 +190,14 @@ install-migrations-testing-requirements: ## Install migrations testing requireme
 stop_rm:
 	export COMPOSE_FILE=test.yml && docker-compose stop && docker-compose rm -f
 
+tox:
+	docker-compose -f test.yml -p test run --rm django tox
+
+build_tox: build_test
+	docker-compose -f test.yml -p test run --rm django tox
+
 #test: venv ## Run tests
-tests:
+test:
 	docker-compose -f test.yml -p test run --rm django $(PYTEST)
 
 retest: venv ## Run failed tests only

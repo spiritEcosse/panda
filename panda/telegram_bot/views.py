@@ -58,7 +58,7 @@ class Converter(viewsets.ModelViewSet):
         except ObjectDoesNotExist:
             pass
 
-    def update(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs): # ToDo add edited_channel_post
         instance = self.get_object(**kwargs)
         self.update_image = True
         serializer = self.get_serializer(

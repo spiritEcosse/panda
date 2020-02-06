@@ -2,6 +2,9 @@
 
 -r ./base.txt
 
+# Django oscar
+django-oscar==2.0.1 # https://github.com/django-oscar/django-oscar
+
 gunicorn==19.9.0  # https://github.com/benoitc/gunicorn
 sentry-sdk==0.10.2  # https://github.com/getsentry/sentry-python
 

@@ -22,6 +22,23 @@ ProductClass, Product, ProductCategory, Category, ProductImage = get_classes(
     'catalogue.models', ('ProductClass', 'Product', 'ProductCategory', 'Category', "ProductImage"))
 
 media_group_id = "12559467035666010"
+
+# {
+#   "update_id": 386414751,
+#   "edited_channel_post": {
+#     "message_id": 154,
+#     "chat": {
+#       "id": -1001241134985,
+#       "title": "test_channel",
+#       "username": "test_channellllllllll",
+#       "type": "channel"
+#     },
+#     "date": 1580804243,
+#     "edit_date": 1580805706,
+#     "text": "dfdddddddddddddddd"
+#   }
+# }
+
 data_test_create_product = (
     ({
         "update_id": 552201929,

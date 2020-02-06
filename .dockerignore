@@ -3,4 +3,4 @@
 !.env
 !.pylintrc
 **/__pycache__/**
-
+.tox/

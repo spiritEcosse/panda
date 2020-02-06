@@ -1,15 +1,10 @@
-import os
-
 from config.settings.base import *  # noqa
-from config.settings.base import env
 
 # Path helper
 location = lambda x: os.path.join(
     os.path.dirname(os.path.realpath(__file__)), x)
 
 ALLOWED_HOSTS = ['test', '.oscarcommerce.com']
-
-DATABASES["default"] = env.db("DATABASE_URL")  # noqa F405
 
 INSTALLED_APPS = [
     'django.contrib.admin',

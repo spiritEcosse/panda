@@ -12,7 +12,7 @@ python-telegram-bot==11.1.0 # https://github.com/python-telegram-bot/python-tele
 
 # Django
 # ------------------------------------------------------------------------------
-django==2.2.4  # pyup: < 3.0  # https://www.djangoproject.com/
+Django==2.2.4  # pyup: < 3.0  # https://www.djangoproject.com/
 django-environ==0.4.5  # https://github.com/joke2k/django-environ
 django-model-utils==3.2.0  # https://github.com/jazzband/django-model-utils
 django-allauth==0.39.1  # https://github.com/pennersr/django-allauth
@@ -25,7 +25,6 @@ djangorestframework==3.10.2  # https://github.com/encode/django-rest-framework
 coreapi==2.3.3  # https://github.com/core-api/python-client
 
 # Django oscar
-django-oscar==2.0.1 # https://github.com/django-oscar/django-oscar
 sorl-thumbnail==12.5.0 # https://pypi.org/project/sorl-thumbnail/
 elasticsearch>=2.0.0,<3.0.0 # https://pypi.org/project/elasticsearch/
 psycopg2==2.8.3 --no-binary psycopg2  # https://github.com/psycopg/psycopg2

@@ -10,10 +10,10 @@ DJANGO_SETTINGS_MODULE=tests.settings
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
-DJANGO_SETTINGS_MODULE=tests.settings
 
 # Celery
 # ------------------------------------------------------------------------------
+CELERY_BROKER_URL=redis://redis:6379/0
 
 # Flower
 CELERY_FLOWER_USER=keUmVRmpMehXpvLSRutatPCjNdpHeauE

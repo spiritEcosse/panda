@@ -5,13 +5,14 @@ import django
 
 
 def pytest_addoption(parser):
-    parser.addoption('--sqlite', action='store_true')
     parser.addoption(
         '--deprecation', choices=['strict', 'log', 'none'], default='log')
 
 
 def pytest_configure(config):
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.settings')
+    os.environ.setdefault('DJANGO_READ_DOT_ENV_FILE', '1')
+    os.environ.setdefault('DATABASE_URL', 'postgres://SUQWOetkbOGJpuXAxliKpZmnyywHdeqm:YZHXsIPZyoBwOUTwAMCLWcJKhYwpwVoeiAhjYMSIqZCBCjAvDBTXUArvSWuhxkgn@postgres:5432/test')
 
     deprecation = config.getoption('deprecation')
     if deprecation == 'strict':
@@ -25,9 +26,5 @@ def pytest_configure(config):
     elif deprecation == 'none':
         # Deprecation warnings are ignored by default
         pass
-
-    if config.getoption('sqlite'):
-        os.environ['DATABASE_ENGINE'] = 'django.db.backends.sqlite3'
-        os.environ['DATABASE_NAME'] = ':memory:'
 
     django.setup()

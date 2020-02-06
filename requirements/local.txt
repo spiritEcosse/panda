@@ -1,5 +1,8 @@
 -r ./base.txt
 
+# Django oscar
+django-oscar==2.0.1 # https://github.com/django-oscar/django-oscar
+
 Werkzeug==0.14.1  # pyup: < 0.15 # https://github.com/pallets/werkzeug
 ipdb==0.12.2  # https://github.com/gotcha/ipdb
 Sphinx==2.1.2  # https://github.com/sphinx-doc/sphinx
