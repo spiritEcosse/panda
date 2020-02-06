@@ -193,12 +193,15 @@ stop_rm:
 tox:
 	docker-compose -f test.yml -p test run --rm django tox
 
+tox_parallel:
+	docker-compose -f test.yml -p test run --rm django tox -p all
+
 build_tox: build_test
 	docker-compose -f test.yml -p test run --rm django tox
 
 #test: venv ## Run tests
 test:
-	docker-compose -f test.yml -p test run --rm django $(PYTEST)
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201
 
 retest: venv ## Run failed tests only
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) --lf
