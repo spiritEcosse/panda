@@ -43,6 +43,7 @@ data_test_various_price = (
     ("Price:100$ / 50€", "100"),
     ("Price:  100$  / 50€", "100"),
     ("Price:  100.90", "100.90"),
+    ("Price-100.90", "100.90"),
     ("Wrong price.", ""),
 )
 
@@ -428,7 +429,7 @@ class StockRecordSerializerTest(TestCase):
         with patch('panda.telegram_bot.serializers.re.match', mock_re):
             assert self.s.parse_price_excl_tax(Mock(), value) == ""
 
-        mock_re.assert_called_once_with(r".*:\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
+        mock_re.assert_called_once_with(r".*[:-]+\s*(?P<price>\d+)(?P<hundredths>\.\d+)*(.*/.*)*", value)
 
     def test_initial_partner(self):
         field = Mock()
