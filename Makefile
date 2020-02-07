@@ -193,6 +193,9 @@ stop_rm:
 tox:
 	docker-compose -f test.yml -p test run --rm django tox
 
+tox_pypy3:
+	docker-compose -f test.yml -p test run --rm django tox -e py3
+
 tox_parallel:
 	docker-compose -f test.yml -p test run --rm django tox -p all
 
