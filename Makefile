@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 PORT_WEB?=8000
 COMPOSE_FILE?=local.yml
 PORT_DB?=5432
@@ -9,6 +10,8 @@ REPO_TEST=shevchenkoigor/panda_test
 DOCKER_FILE=compose/local/django/Dockerfile
 DOCKER_FILE_TEST=compose/test/django/Dockerfile
 APP?=
+include .env
+export $(shell sed 's/=.*//' .env)
 
 makemessages:
 	docker-compose -f ${COMPOSE_FILE} exec django ./manage.py makemessages -a
@@ -207,16 +210,17 @@ retest: venv ## Run failed tests only
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) --lf
 
 tests_unit:
-	docker-compose -f test.yml -p test run --rm django $(PYTEST) --cov=panda -m unit tests/panda/
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda -m unit tests/panda/
 
 tests_integration:
-	docker-compose -f test.yml -p test run --rm django $(PYTEST) -m integration tests/panda/
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda -m integration tests/panda/
 
 tests_unit_coverage_html:
-	$(PYTEST) --cov=panda --cov-report=html -m unit tests/panda/
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda --cov-report=html -m unit tests/panda/
+	xdg-open ${HTML}/index.html
 
 tests_all_coverage:
-	docker-compose -f test.yml -p test run --rm django $(PYTEST) --cov=panda tests/panda/
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda
 
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/
