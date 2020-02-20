@@ -33,6 +33,9 @@ RUN pyenv rehash
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements /requirements
+RUN pip install -r /requirements/base.txt
+
+COPY ./requirements /requirements
 RUN pip install -r /requirements/test.txt
 
 COPY ./compose/local/django/start /start

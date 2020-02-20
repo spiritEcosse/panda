@@ -16,6 +16,43 @@ PROJECT_DIR = os.path.dirname(__file__)
 # import panda  # noqa isort:skip
 
 install_requires = [
+    "pytz==2019.2",  # https://github.com/stub42/pytz
+    "python-slugify==3.0.3",  # https://github.com/un33k/python-slugify
+    "Pillow==6.1.0",  # https://github.com/python-pillow/Pillow
+    "rcssmin==1.0.6",  # https://github.com/ndparker/rcssmin
+    "argon2-cffi==19.1.0",  # https://github.com/hynek/argon2_cffi
+    "whitenoise==4.1.3",  # https://github.com/evansd/whitenoise
+    "redis==3.3.6",  # https://github.com/antirez/redis
+    "celery==4.3.0",  # pyup: < 5.0  # https://github.com/celery/celery
+    "django-celery-beat==1.5.0",  # https://github.com/celery/django-celery-beat
+    "flower==0.9.3",  # https://github.com/mher/flower
+    "python-telegram-bot==11.1.0",  # https://github.com/python-telegram-bot/python-telegram-bot
+
+    # Django
+    # ------------------------------------------------------------------------------
+    "Django==2.2.4",  # pyup: < 3.0  # https://www.djangoproject.com/
+    "django-environ==0.4.5",  # https://github.com/joke2k/django-environ
+    "django-model-utils==3.2.0",  # https://github.com/jazzband/django-model-utils
+    "django-allauth==0.39.1",  # https://github.com/pennersr/django-allauth
+    "django-crispy-forms==1.7.2",  # https://github.com/django-crispy-forms/django-crispy-forms
+    "django-compressor==2.3",  # https://github.com/django-compressor/django-compressor
+    "django-redis==4.10.0",  # https://github.com/niwinz/django-redis
+
+    # Django REST Framework
+    "djangorestframework==3.10.2",  # https://github.com/encode/django-rest-framework
+    "coreapi==2.3.3",  # https://github.com/core-api/python-client
+
+    # Django oscar
+    "sorl-thumbnail==12.5.0",  # https://pypi.org/project/sorl-thumbnail/
+    "elasticsearch>=2.0.0,<3.0.0",  # https://pypi.org/project/elasticsearch/
+    "psycopg2==2.8.3",  # https://github.com/psycopg/psycopg2
+
+    # Helpers
+    "pyprof2calltree==1.4.4",
+    "ipython==7.7.0",
+
+    # Country data
+    "pycountry==19.8.18",
 ]
 
 docs_requires = [
