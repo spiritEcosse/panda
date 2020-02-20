@@ -18,6 +18,6 @@ class ProductTest(ProductTests):
     @override_settings(OSCAR_SLUG_FUNCTION="panda.core.utils.slugify")
     def test_slug(self):
         exp = "kompiuter"
-        product = Product(title="Компьютер", product_class=self.product_class)
+        product = Product(title="Компьютер", product_class=self.product_class, message_id=1)
         product.save()
         self.assertEqual(product.slug, exp)

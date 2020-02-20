@@ -26,11 +26,9 @@ RUN apk update \
 
 ENV PATH /root/.pyenv/shims:/root/.pyenv/bin:$PATH
 RUN set -x \
-    && pythonVersions='3.7.6 3.6.10' \
-    && curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash \
-    && echo $pythonVersions | xargs -n 1 pyenv install
+    && curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 
-RUN pyenv local system $pythonVersions
+RUN pyenv install 3.7.6
 RUN pyenv rehash
 
 # Requirements are installed here to ensure they will be cached.

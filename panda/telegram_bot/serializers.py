@@ -187,8 +187,8 @@ class MessageSerializer(CommonSerializer):
 
     class Meta:
         model = Product
-        fields = ['title', "availability", 'stock', 'description', "category_str",
-                  "production_days", "product_class", "upc", "image", "media_group_id"]
+        caption_fields = ('title', "availability", 'stock', 'description', "category_str", "production_days", )
+        fields = caption_fields + ("product_class", "upc", "image", "media_group_id", 'message_id')
         extra_kwargs = {
             'title': {'required': True},
             'availability': {'required': True},
@@ -196,6 +196,8 @@ class MessageSerializer(CommonSerializer):
             'description': {'required': True},
             'category_str': {'required': True},
             'upc': {'required': True},
+            'message_id': {'required': True},
+            'production_days': {'required': True},
         }
 
     def to_internal_value(self, data):
@@ -219,6 +221,9 @@ class MessageSerializer(CommonSerializer):
 
         return days
 
+    def initial_production_days(self, *args):
+        return None
+
     def parse_category_str(self, _, value):
         separator = '>'
         return " > ".join(map(lambda el: el.strip().capitalize(), value.split(separator)))
@@ -234,6 +239,18 @@ class MessageSerializer(CommonSerializer):
     def parse_image(self, field, value):
         return field.parser(value)
 
+    def update(self, instance, validated_data):
+        validated_data.pop('availability')
+        stock_data = validated_data.pop('stock')
+        image = validated_data.pop('image')
+        validated_data.pop('product_class') # ToDo maybe create new ProductClass, if category will changed ?
+        cat = create_from_breadcrumbs(validated_data.pop('category_str'))
+        ProductCategory.objects.get_or_create(product=instance, category=cat)
+        self.fields['stock'].create(stock_data, product=instance)
+        self.Meta.model.objects.update(id=instance.id, **validated_data)
+        self.fields['image'].create(image, product=instance)
+        return instance
+
     def create(self, validated_data):
         validated_data.pop('availability')
         stock_data = validated_data.pop('stock')
@@ -242,22 +259,8 @@ class MessageSerializer(CommonSerializer):
             validated_data.pop('product_class')
         )
         cat = create_from_breadcrumbs(validated_data.pop('category_str'))
-        item = self.Meta.model.objects.create(product_class=product_class, **validated_data)
-        ProductCategory.objects.create(product=item, category=cat)
-        self.fields['stock'].create(stock_data, product=item)
-        self.fields['image'].create(image, product=item)
-        return item
-
-
-class MessageImageSerializer(MessageSerializer):
-    class Meta:
-        model = Product
-        fields = ["image"]
-        extra_kwargs = {
-            'image': {'required': True},
-        }
-
-    def update(self, instance, validated_data):
-        image = validated_data.pop('image')
+        instance = self.Meta.model.objects.create(product_class=product_class, **validated_data)
+        ProductCategory.objects.create(product=instance, category=cat)
+        self.fields['stock'].create(stock_data, product=instance)
         self.fields['image'].create(image, product=instance)
         return instance

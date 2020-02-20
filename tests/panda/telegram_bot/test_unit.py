@@ -4,34 +4,36 @@ from unittest.mock import patch, Mock, MagicMock, call
 
 import pytest
 from django.conf import settings
+from django.http import Http404
 from django.test.utils import override_settings
 from freezegun import freeze_time
 from rest_framework.serializers import ValidationError
-from django.core.exceptions import ObjectDoesNotExist
+
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
 from panda.telegram_bot.views import Converter
 
 data_test_various_caption = (
-    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str\n\nproduction days: 10 days.",
+    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\n"
+     "category_str>sub_category_str\n\nproduction days: 10 days.",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
       "production_days": "production days: 10 days.", "image": {'original': 'some'},
-      "media_group_id": "12345"
-      }
-     ),
-    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\ncategory_str>sub_category_str",
+      "media_group_id": "12345", 'message_id': 1
+      }),
+    ("title\n\navailability\n\nPrice: 100$\n\ndescription\ndescription\ndescription\n\n"
+     "category_str>sub_category_str",
      {"title": "title", "availability": "availability", "stock": "Price: 100$",
       "description": "description\ndescription\ndescription", "category_str": "category_str>sub_category_str",
       "image": {'original': 'some'},
-      "media_group_id": "12345"
-     }
-     ),
-    ("\n\n\r\ttitle\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\rcategory_str>category_str",
-     {"title": "title", "availability": "availability", "stock": "Price: 100$",
+      "media_group_id": "12345", 'message_id': 1
+      }),
+    ("\n\n\r\ttitle change\n\n\r\navailability\n\n\rPrice: 100$\n\n\t\rdescription\n\n\r"
+     "category_str>category_str",
+     {"title": "title change", "availability": "availability", "stock": "Price: 100$",
       "description": "description", "category_str": "category_str>category_str", "image": {'original': 'some'},
-      }
-    ),
+      'message_id': 1
+      }),
 )
 
 
@@ -95,14 +97,16 @@ def test_parse_category_str(inp, exp):
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_caption)
 def test_validate_caption(inp, exp):
-    update = Mock()
-    update.channel_post.caption = inp
+    channel_post = Mock()
+    channel_post.caption = inp
     file_ = Mock()
     file_.get_file.return_value= "some"
-    update.channel_post.photo = [file_]
-    update.channel_post.media_group_id = exp.get('media_group_id', None)
+    channel_post.photo = [file_]
+    channel_post.media_group_id = exp.get('media_group_id', None)
+    channel_post.message_id = exp['message_id']
     converter = Converter()
-    assert converter.get_data(update) == exp
+    converter.channel_post = channel_post
+    assert converter.get_data() == exp
 
 @pytest.mark.unit
 @pytest.mark.parametrize("inp, exp", data_test_various_production_days)
@@ -190,6 +194,16 @@ class MessagesTest(TestCase):
 
     def setUp(self):
         self.converter = Converter()
+        self.converter.kwargs = {}
+        self.order = Mock()
+        self.obj = Mock()
+        self.order.super = Mock(**{"get_object.return_value": self.obj})
+        self.converter.get_media_group_id = self.order.get_media_group_id = Mock(return_value=None)
+        self.converter.get_data = self.order.get_data = Mock()
+        self.update = Mock(edited_channel_post=None)
+        self.calls = [
+            call.super.get_object(),
+        ]
 
     @override_settings(CHAT_ID=11)
     @override_settings(TOKEN_TELEGRAM="some")
@@ -217,7 +231,7 @@ class MessagesTest(TestCase):
         loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, \
             update = \
             Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock(), Mock(return_value=False), Mock()
+            Mock(), Mock(), Mock(side_effect=Http404), Mock()
         update_bot_obj.channel_post.chat_id = 10
         status.HTTP_201_CREATED = 201
         self.converter.get_data = get_data
@@ -236,10 +250,10 @@ class MessagesTest(TestCase):
         loads.assert_called_once_with(request.body)
         update_bot.assert_called_once_with(loads(), bot())
         get_object.assert_called_once_with(update=update_bot())
-        get_data.assert_called_once_with(update_bot())
+        get_data.assert_called_once_with()
         serializer.assert_called_once_with(data=my_data)
         serializer = serializer()
-        serializer.is_valid.assert_called_once_with(raise_exception=False)
+        serializer.is_valid.assert_called_once_with(raise_exception=True)
         serializer.save.assert_called_once_with()
         response.assert_called_once_with(status=status.HTTP_201_CREATED)
 
@@ -270,68 +284,78 @@ class MessagesTest(TestCase):
         update.assert_called_once_with(request, update=update_bot())
         response.assert_called_once_with(status=status.HTTP_200_OK)
 
-    def test_update(self):
-        order, request, instance, get_data_image, update = Mock(), Mock(), Mock(), Mock(), Mock()
+    def mock_update(self):
+        """Initial mocks for update method"""
+
+        order, request, instance, get_data, update = Mock(), Mock(), Mock(), Mock(), Mock()
         order.serializer = Mock(**{'save.return_value': Mock(), 'is_valid.return_value': False})
         self.converter.get_object = order.get_object = Mock(return_value=instance)
         self.converter.get_serializer = order.get_serializer = Mock(return_value=order.serializer)
-        self.converter.get_data_image = order.get_data_image = Mock(return_value=get_data_image)
+        self.converter.get_data = order.get_data = Mock(return_value=get_data)
         kwargs = {}
-        common = [
+        args = (request, )
+        calls = [
             call.get_object(**kwargs),
-            call.get_data_image(**kwargs),
-            call.get_serializer(instance, data=get_data_image, partial=True),
-            call.serializer.is_valid(raise_exception=False)
+            call.get_data(**kwargs),
+            call.get_serializer(instance, data=get_data, partial=True),
+            call.serializer.is_valid(raise_exception=True),
         ]
+        return calls, order, kwargs, args
+
+    def test_update_validation_error(self):
+        """Test update when raised ValidationError"""
+
+        calls, order, kwargs, args = self.mock_update()
+        order.serializer.is_valid.side_effect = ValidationError
 
         with self.assertRaises(ValidationError):
-            self.converter.update(request, kwargs)
+            self.converter.update(*args, kwargs)
+        self.assertListEqual(order.mock_calls, calls)
 
-        self.assertListEqual(order.mock_calls, common)
+    def test_update(self):
+        """Test update when saved data to db"""
 
-        order.mock_calls = []
-        order.serializer.is_valid.return_value = True
+        calls, order, kwargs, args = self.mock_update()
 
-        self.converter.update(request, kwargs)
-        self.assertListEqual(order.mock_calls, common + [call.serializer.save()])
+        self.converter.update(*args, kwargs)
+        self.assertListEqual(order.mock_calls, calls + [call.serializer.save()])
 
-    def test_get_object(self):
-        obj, order, update = Mock(), Mock(), Mock()
-        objects = Mock(**{'get.return_value': obj})
-        model = Mock(**{'objects': objects})
-        meta = Mock(**{'model': model})
+    def test_get_object_not_update(self):
+        """Test get_object when nothing pass"""
+
+        with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
+            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertListEqual(self.order.mock_calls, [call.get_media_group_id()] + self.calls)
+            self.assertDictEqual({'message_id': None}, self.converter.kwargs)
+
+    def test_get_object_exist_media_group_id(self):
+        """Test get_object when exist media_group_id"""
+
         media_group_id = 1
-        self.converter.get_media_group_id = order.get_media_group_id = Mock(return_value=media_group_id)
-        self.converter.serializer_class = order.serializer_class = Mock(**{'Meta': meta})
-        common = [
-            call.get_media_group_id(update=update)
-        ]
-        kw = {'update': update}
+        self.converter.get_media_group_id = self.order.get_media_group_id = Mock(return_value=media_group_id)
 
-        self.assertEqual(obj, self.converter.get_object(**kw))
-        self.assertListEqual(order.mock_calls, common + [
-            call.serializer_class.Meta.model.objects.get(media_group_id=media_group_id)
-        ])
+        with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
+            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertListEqual(self.order.mock_calls, [call.get_media_group_id()] + self.calls)
+            self.assertDictEqual({'media_group_id': media_group_id}, self.converter.kwargs)
 
-        order.mock_calls = []
-        objects.get.side_effect = ObjectDoesNotExist
-        self.assertEqual(None, self.converter.get_object(**kw))
-        self.assertListEqual(order.mock_calls, common + [
-            call.serializer_class.Meta.model.objects.get(media_group_id=media_group_id)
-        ])
+    def test_get_object_exist_message_id(self):
+        """Test get_object when exist message_id"""
 
-        order.mock_calls = []
-        order.get_media_group_id.return_value = None
-        self.assertEqual(None, self.converter.get_object(**kw))
-        self.assertListEqual(order.mock_calls, common)
+        message_id = 12
+        self.update.edited_channel_post = Mock(message_id=message_id)
+
+        with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
+            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertListEqual(self.order.mock_calls, self.calls)
+            self.assertDictEqual({'message_id': message_id}, self.converter.kwargs)
 
     def test_get_data_image(self):
         file_ = Mock()
         photo = Mock(**{'get_file.return_value': file_})
         channel_post = Mock(**{'photo': [photo]})
-        update = Mock(**{'channel_post': channel_post})
-        kw = {'update': update}
-        self.assertDictEqual({'image': {'original': file_}}, self.converter.get_data_image(**kw))
+        self.converter.channel_post = channel_post
+        self.assertDictEqual({'image': {'original': file_}}, self.converter.get_data_image())
         photo.get_file.assert_called_once_with()
 
 
@@ -624,7 +648,7 @@ class MessageSerializerTest(TestCase):
     #     self.assertEqual(self.s.parse_stock(value), {'stock': ''})
     #
 
-    def test_to_internal_value(self):
+    def test_to_internal_value(self): # ToDo make easy, exactly
         inp = {"have_parse": "in_data", "not_have_parse": "in_data"}
         exp = {
             "have_parse": 1,
@@ -679,6 +703,9 @@ class MessageSerializerTest(TestCase):
         self.s.parse_image(field, value)
         field.parser.assert_called_once_with(value)
 
+    def test_initial_production_days(self):
+        self.assertIsNone(self.s.initial_production_days())
+
     def test_initial_upc(self):
         self.s.parsed_data['stock'] = {'partner_sku': 121212}
         self.assertEqual(self.s.initial_upc(), 121212)
@@ -697,6 +724,38 @@ class MessageSerializerTest(TestCase):
                 self.s.parse_production_days(Mock(), value)
 
         mock_re.assert_called_once_with(r".*:\s*(?P<days>\d+)(.*)*", value)
+
+    def test_update(self):
+        inp = {
+            "title": "title",
+            "availability": True,
+            "category_str": "category_str",
+            "production_days": None,
+            "image": {'original': 'file'},
+            'stock': {
+                "partner_sku": 12, 'partner': {"name": "name"}
+            },
+            "product_class": {"name": "name"}
+        }
+        validated_data = inp.copy()
+        exp = {"title": "title", "production_days": None}
+
+        with patch('panda.telegram_bot.serializers.StockRecordSerializer', self.order.stock_record):
+            with patch('panda.telegram_bot.serializers.create_from_breadcrumbs', self.create_from_breadcrumbs):
+                with patch('panda.telegram_bot.serializers.ProductCategory', self.order.product_category):
+                    self.assertEqual(self.s.update(self.product, validated_data), self.product)
+                    self.assertDictEqual(exp, validated_data)
+
+        self.assertListEqual(
+            self.order.mock_calls,
+            [
+                call.create_from_breadcrumbs(inp['category_str']),
+                call.product_category.objects.get_or_create(product=self.product, category=self.create_from_breadcrumbs),
+                call.stock_record.create(inp['stock'], product=self.product),
+                call.message_serializer_meta.model.objects.update(id=self.product.id, **validated_data),
+                call.image.create(inp['image'], product=self.product),
+            ]
+        )
 
     def test_create(self):
         inp = {
@@ -725,7 +784,9 @@ class MessageSerializerTest(TestCase):
             [
                 call.product_class.create(inp['product_class']),
                 call.create_from_breadcrumbs(inp['category_str']),
-                call.message_serializer_meta.model.objects.create(product_class=self.product_class_model, **validated_data),
+                call.message_serializer_meta.model.objects.create(
+                    product_class=self.product_class_model, **validated_data
+                ),
                 call.product_category.objects.create(product=self.product, category=self.create_from_breadcrumbs),
                 call.stock_record.create(inp['stock'], product=self.product),
                 call.image.create(inp['image'], product=self.product),

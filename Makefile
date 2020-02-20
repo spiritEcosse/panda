@@ -162,6 +162,9 @@ startapp:
 ipython:
 	docker-compose -f ${COMPOSE_FILE} run --rm django ipython
 
+test_ipython:
+	docker-compose -f test.yml -p test run --rm django ipython
+
 bash:
 	docker-compose -f ${COMPOSE_FILE} run --rm django sh
 
@@ -209,18 +212,18 @@ test:
 retest: venv ## Run failed tests only
 	docker-compose -f test.yml -p test run --rm django $(PYTEST) --lf
 
-tests_unit:
-	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda -m unit tests/panda/
+tests_unit_panda:
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda -m unit tests/panda/
 
-tests_integration:
-	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda -m integration tests/panda/
+tests_integration_panda:
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda -m integration tests/panda/
 
-tests_unit_coverage_html:
-	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda --cov-report=html -m unit tests/panda/
+tests_unit_coverage_html_panda:
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda --cov-report=html -m unit tests/panda/
 	xdg-open ${HTML}/index.html
 
-tests_all_coverage:
-	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 tests/panda/ -- --cov=panda
+tests_all_coverage_panda:
+	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda tests/panda/
 
 lint: ## Run flake8 and isort checks
 	flake8 src/oscar/
