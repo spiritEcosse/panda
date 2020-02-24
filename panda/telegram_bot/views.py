@@ -19,6 +19,7 @@ class Converter(viewsets.ModelViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.channel_post = None
+        self.bot_update = None
 
     def get_data(self):
         text = self.channel_post.caption.strip()
@@ -42,11 +43,9 @@ class Converter(viewsets.ModelViewSet):
     def get_media_group_id(self):
         return getattr(self.channel_post, 'media_group_id', None)
 
-    def get_object(self, **kwargs):
-        update = kwargs['update']
-
+    def get_object(self):
         try:
-            lookup_field = update.edited_channel_post.message_id
+            lookup_field = self.channel_post.message_id
         except AttributeError:
             lookup_field = self.get_media_group_id()
 
@@ -57,22 +56,24 @@ class Converter(viewsets.ModelViewSet):
         return super().get_object()
 
     def update(self, request, *args, **kwargs):
-        instance = self.get_object(**kwargs)
-        serializer = self.get_serializer(instance, data=self.get_data(), partial=True)
+        serializer = self.get_serializer(self.get_object(), data=self.get_data(), partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
     def create(self, request, *args, **kwargs):
         bot = Bot(settings.TOKEN_TELEGRAM)
-        update = Update.de_json(json.loads(request.body), bot)
+        self.bot_update = Update.de_json(request.data, bot)
 
-        self.channel_post = update.channel_post or update.edited_channel_post
+        self.channel_post = self.bot_update.channel_post or self.bot_update.edited_channel_post
         status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
         if self.channel_post.chat_id == settings.CHAT_ID:
+            if getattr(self.bot_update.edited_channel_post, "caption", False) is None:
+                return self.destroy(request, *args, **kwargs)
+
             try:
-                self.get_object(update=update)
-                self.update(request, *args, update=update, **kwargs)
+                self.get_object()
+                self.update(request, *args, **kwargs)
                 status_code = status.HTTP_200_OK
             except Http404:
                 serializer = self.get_serializer(data=self.get_data())

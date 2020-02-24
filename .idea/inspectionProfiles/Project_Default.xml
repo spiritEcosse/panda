@@ -12,10 +12,10 @@
         </value>
       </option>
     </inspection_tool>
-    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="ignoredPackages">
         <value>
-          <list size="43">
+          <list size="44">
             <item index="0" class="java.lang.String" itemvalue="selenium" />
             <item index="1" class="java.lang.String" itemvalue="factory-boy" />
             <item index="2" class="java.lang.String" itemvalue="python-dateutil" />
@@ -59,6 +59,7 @@
             <item index="40" class="java.lang.String" itemvalue="vine" />
             <item index="41" class="java.lang.String" itemvalue="face-recognition" />
             <item index="42" class="java.lang.String" itemvalue="cmake" />
+            <item index="43" class="java.lang.String" itemvalue="uWSGI" />
           </list>
         </value>
       </option>

@@ -17,6 +17,7 @@ from rest_framework.test import APITestCase, URLPatternsTestCase
 from panda.catalogue.apps import CatalogueConfig
 from panda.telegram_bot.serializers import MessageSerializer, ProductImageSerializer
 from panda.telegram_bot.urls import router
+from copy import deepcopy
 
 Partner, StockRecord = get_classes('partner.models', ['Partner', 'StockRecord'])
 ProductClass, Product, ProductCategory, Category, ProductImage = get_classes(
@@ -176,6 +177,47 @@ data_test_create_product = (
             "channel_chat_created": False
         }
     }, status.HTTP_200_OK),
+    ({
+        "update_id": 552201929,
+        "edited_channel_post": {
+            "message_id": message_id,
+            "media_group_id": media_group_id,
+            "date": 1567772991,
+            "chat": {
+                "id": 10,
+                "type": "channel",
+                "title": "test_channel",
+                "username": "test_channellllllllll"
+            },
+            "entities": [],
+            "caption_entities": [],
+            "photo": [
+                {
+                    "file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgD",
+                    "width": 320,
+                    "height": 90,
+                    "file_size": 9260
+                },
+                {
+                    "file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgE",
+                    "width": 800,
+                    "height": 225,
+                    "file_size": 46171
+                },
+                {
+                    "file_id": "AgADAgAD9KwxG1jAOEu4jW4QDw-mEaDWtw8ABAEAAwIAA20AA83mAgABFgF",
+                    "width": 1280,
+                    "height": 360,
+                    "file_size": 104567}
+            ],
+            "new_chat_members": [],
+            "new_chat_photo": [],
+            "delete_chat_photo": False,
+            "group_chat_created": False,
+            "supergroup_chat_created": False,
+            "channel_chat_created": False
+        }
+    }, status.HTTP_204_NO_CONTENT),
 )
 
 
@@ -252,10 +294,26 @@ class TelegramViewsTests(APITestCase, URLPatternsTestCase):
         """
         Ensure we can create a new account object.
         """
-        create_product(self, 0)
-        create_product(self, 1)
-        create_product(self, 2)
+        self.create_product()
+        self.update_product_with_media()
+        self.update_product_with_caption()
         self.assertEqual(1, Product.objects.count())
+        self.delete_product()
+
+    def create_product(self):
+        create_product(self, 0)
+
+    def update_product_with_media(self):
+        create_product(self, 1)
+
+    def update_product_with_caption(self):
+        create_product(self, 2)
+
+    def delete_product(self):
+        inp, exp = data_test_create_product[3]
+        url = reverse("{}-list".format(settings.HASH))
+        response = self.client.post(url, data=inp, format="json")
+        self.assertEqual(response.status_code, exp)
 
     def test_create_product_envs_only_required_fields(self):
         """

@@ -7,7 +7,7 @@ volumes:
 
 services:
   django: &django
-    image: shevchenkoigor/panda:telegram_bot
+    image: shevchenkoigor/panda:PANDA-4
     restart: on-failure
     depends_on:
       - postgres
@@ -48,7 +48,7 @@ services:
 
   celeryworker:
     <<: *django
-    image: shevchenkoigor/panda:telegram_bot
+    image: shevchenkoigor/panda:PANDA-4
     depends_on:
       - redis
       - postgres
@@ -58,7 +58,7 @@ services:
 
   celerybeat:
     <<: *django
-    image: shevchenkoigor/panda:telegram_bot
+    image: shevchenkoigor/panda:PANDA-4
     depends_on:
       - redis
       - postgres
@@ -68,7 +68,7 @@ services:
 
   flower:
     <<: *django
-    image: shevchenkoigor/panda:telegram_bot
+    image: shevchenkoigor/panda:PANDA-4
     ports:
       - "5554:5555"
     command: /start-flower

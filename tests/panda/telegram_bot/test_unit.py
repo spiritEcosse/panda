@@ -8,6 +8,7 @@ from django.http import Http404
 from django.test.utils import override_settings
 from freezegun import freeze_time
 from rest_framework.serializers import ValidationError
+from rest_framework import status
 
 from panda.telegram_bot.serializers import MessageSerializer, StockRecordSerializer, \
     ProductClassSerializer, PartnerSerializer, ProductImageSerializer
@@ -200,90 +201,93 @@ class MessagesTest(TestCase):
         self.order.super = Mock(**{"get_object.return_value": self.obj})
         self.converter.get_media_group_id = self.order.get_media_group_id = Mock(return_value=None)
         self.converter.get_data = self.order.get_data = Mock()
-        self.update = Mock(edited_channel_post=None)
+        self.converter.bot_update = Mock(edited_channel_post=None)
         self.calls = [
             call.super.get_object(),
         ]
 
+    # create
+    def mock_create(self):
+        order, request, bot_obj, get_data = Mock(), Mock(data={}), Mock(), Mock()
+        order.bot, order.serializer = Mock(return_value=bot_obj), Mock()
+        update_bot_obj, order.status =\
+            Mock(**{'channel_post.chat_id': 10}), Mock(
+                HTTP_201_CREATED=status.HTTP_201_CREATED, HTTP_200_OK=status.HTTP_200_OK
+            )
+        self.converter.get_data = order.get_data = Mock(return_value=get_data)
+        self.converter.get_serializer = order.get_serializer = Mock(return_value=order.serializer)
+        self.converter.get_object = order.get_object = Mock()
+        self.converter.update = order.update = Mock()
+
+        order.update_bot = Mock(return_value=update_bot_obj)
+        args = (request, )
+        kwargs = {}
+        calls = [
+            call.bot(settings.TOKEN_TELEGRAM),
+            call.update_bot(request.data, bot_obj),
+        ]
+        return calls, order, kwargs, args, get_data, update_bot_obj
+
     @override_settings(CHAT_ID=11)
     @override_settings(TOKEN_TELEGRAM="some")
     def test_wrong_chat_id(self):
-        request, update, response, status, settings, bot, loads = \
-            Mock(), Mock(), Mock(), Mock(), Mock(), Mock(), Mock()
+        request, update, response, status_code, settings, bot = \
+            Mock(data={}), Mock(), Mock(), Mock(HTTP_500_INTERNAL_SERVER_ERROR=status.HTTP_500_INTERNAL_SERVER_ERROR), Mock(), Mock()
         update.channel_post.chat_id = 10
-        status.HTTP_500_INTERNAL_SERVER_ERROR = 500
         request.body = "json"
         update = Mock(return_value=update)
 
         with patch('panda.telegram_bot.views.Bot', bot):
             with patch('panda.telegram_bot.views.Update.de_json', update):
-                with patch('panda.telegram_bot.views.json.loads', loads):
-                    with patch('panda.telegram_bot.views.Response', response):
-                        self.converter.create(request)
+                with patch('panda.telegram_bot.views.Response', response):
+                    self.converter.create(request)
 
         bot.assert_called_once_with("some")
-        loads.assert_called_once_with(request.body)
-        update.assert_called_once_with(loads(), bot())
-        response.assert_called_once_with(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        update.assert_called_once_with(request.data, bot())
+        response.assert_called_once_with(status=status_code.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_create(self):
-        my_data = {"my": "data"}
-        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, \
-            update = \
-            Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock(), Mock(side_effect=Http404), Mock()
-        update_bot_obj.channel_post.chat_id = 10
-        status.HTTP_201_CREATED = 201
-        self.converter.get_data = get_data
-        self.converter.get_serializer = serializer
-        self.converter.get_object = get_object
-        self.converter.update = update
-        update_bot = Mock(return_value=update_bot_obj)
-
-        with patch('panda.telegram_bot.views.Bot', bot):
-            with patch('panda.telegram_bot.views.json.loads', loads):
-                with patch('panda.telegram_bot.views.Update.de_json', update_bot):
-                    with patch('panda.telegram_bot.views.Response', response):
-                        self.converter.create(request)
-
-        bot.assert_called_once_with(settings.TOKEN_TELEGRAM)
-        loads.assert_called_once_with(request.body)
-        update_bot.assert_called_once_with(loads(), bot())
-        get_object.assert_called_once_with(update=update_bot())
-        get_data.assert_called_once_with()
-        serializer.assert_called_once_with(data=my_data)
-        serializer = serializer()
-        serializer.is_valid.assert_called_once_with(raise_exception=True)
-        serializer.save.assert_called_once_with()
-        response.assert_called_once_with(status=status.HTTP_201_CREATED)
+        calls, order, kwargs, args, get_data, update_bot_obj = self.mock_create()
+        order.get_object.side_effect = Http404
+        self.run_create(calls, order, kwargs, args, get_data)
+        self.assertListEqual(order.mock_calls, calls + [
+            call.get_object(),
+            call.get_data(),
+            call.get_serializer(data=get_data),
+            call.serializer.is_valid(raise_exception=True),
+            call.serializer.save(),
+            call.response(status=order.status.HTTP_201_CREATED)
+        ])
 
     def test_create_update(self):
-        my_data = {"my": "data"}
-        loads, bot, serializer, update_bot_obj, request, get_data, status, response, get_object, \
-            update = \
-            Mock(), Mock(), Mock(), Mock(), Mock(), MagicMock(return_value=my_data),\
-            Mock(), Mock(), Mock(return_value=True), Mock()
-        update_bot_obj.channel_post.chat_id = 10
-        status.HTTP_200_OK = 200
-        self.converter.get_data = get_data
-        self.converter.get_serializer = serializer
-        self.converter.get_object = get_object
-        self.converter.update = update
-        update_bot = Mock(return_value=update_bot_obj)
+        calls, order, kwargs, args, _, update_bot_obj = self.mock_create()
+        self.run_create(calls, order, kwargs, args, _)
+        self.assertListEqual(order.mock_calls, calls + [
+            call.get_object(),
+            call.update(*args, **kwargs),
+            call.response(status=order.status.HTTP_200_OK)
+        ])
 
-        with patch('panda.telegram_bot.views.Bot', bot):
-            with patch('panda.telegram_bot.views.json.loads', loads):
-                with patch('panda.telegram_bot.views.Update.de_json', update_bot):
-                    with patch('panda.telegram_bot.views.Response', response):
-                        self.converter.create(request)
+    def test_create_delete(self):
+        calls, order, kwargs, args, _, update_bot_obj = self.mock_create()
+        update_bot_obj.channel_post = None
+        update_bot_obj.edited_channel_post = Mock(caption=None, chat_id=10)
+        destroy_obj = Mock()
+        self.converter.destroy = order.destroy = Mock(return_value=destroy_obj)
 
-        bot.assert_called_once_with(settings.TOKEN_TELEGRAM)
-        loads.assert_called_once_with(request.body)
-        update_bot.assert_called_once_with(loads(), bot())
-        get_object.assert_called_once_with(update=update_bot())
-        update.assert_called_once_with(request, update=update_bot())
-        response.assert_called_once_with(status=status.HTTP_200_OK)
+        obj = self.run_create(calls, order, kwargs, args, _)
+        self.assertListEqual(order.mock_calls, calls + [
+            call.destroy(*args, **kwargs)
+        ])
+        self.assertEqual(obj, destroy_obj)
 
+    def run_create(self, calls, order, kwargs, args, get_data):
+        with patch('panda.telegram_bot.views.Bot', order.bot):
+            with patch('panda.telegram_bot.views.Update.de_json', order.update_bot):
+                with patch('panda.telegram_bot.views.Response', order.response):
+                    return self.converter.create(*args)
+
+    # update
     def mock_update(self):
         """Initial mocks for update method"""
 
@@ -320,11 +324,12 @@ class MessagesTest(TestCase):
         self.converter.update(*args, kwargs)
         self.assertListEqual(order.mock_calls, calls + [call.serializer.save()])
 
+    # get_object
     def test_get_object_not_update(self):
         """Test get_object when nothing pass"""
 
         with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
-            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertEqual(self.obj, self.converter.get_object())
             self.assertListEqual(self.order.mock_calls, [call.get_media_group_id()] + self.calls)
             self.assertDictEqual({'message_id': None}, self.converter.kwargs)
 
@@ -335,7 +340,7 @@ class MessagesTest(TestCase):
         self.converter.get_media_group_id = self.order.get_media_group_id = Mock(return_value=media_group_id)
 
         with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
-            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertEqual(self.obj, self.converter.get_object())
             self.assertListEqual(self.order.mock_calls, [call.get_media_group_id()] + self.calls)
             self.assertDictEqual({'media_group_id': media_group_id}, self.converter.kwargs)
 
@@ -343,13 +348,14 @@ class MessagesTest(TestCase):
         """Test get_object when exist message_id"""
 
         message_id = 12
-        self.update.edited_channel_post = Mock(message_id=message_id)
+        self.converter.channel_post = Mock(message_id=message_id)
 
         with patch('panda.telegram_bot.views.super', Mock(return_value=self.order.super)):
-            self.assertEqual(self.obj, self.converter.get_object(**{'update': self.update}))
+            self.assertEqual(self.obj, self.converter.get_object())
             self.assertListEqual(self.order.mock_calls, self.calls)
             self.assertDictEqual({'message_id': message_id}, self.converter.kwargs)
 
+    # get_data_image
     def test_get_data_image(self):
         file_ = Mock()
         photo = Mock(**{'get_file.return_value': file_})

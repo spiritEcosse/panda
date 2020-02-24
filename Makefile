@@ -215,6 +215,9 @@ retest: venv ## Run failed tests only
 tests_unit_panda:
 	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda -m unit tests/panda/
 
+tests_unit_panda_py37_oscar201:
+	docker-compose -f test.yml -p test run --rm django tox -e py37-oscar201 -- --cov=panda -m unit tests/panda/
+
 tests_integration_panda:
 	docker-compose -f test.yml -p test run --rm django tox -e py36-oscar201 -- --cov=panda -m integration tests/panda/
 
