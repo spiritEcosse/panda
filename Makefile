@@ -34,7 +34,13 @@ pytest:
 tests:
 	docker-compose -f ${COMPOSE_FILE} run --rm django tests
 
-deploy_hard:
+up_hard:
+	export COMPOSE_FILE=${COMPOSE_FILE} \
+	&& docker-compose stop \
+	&& docker-compose rm -f \
+	&& docker-compose up --build --remove-orphans --scale initial-data=0
+
+up_build_hard: build_local
 	export COMPOSE_FILE=${COMPOSE_FILE} \
 	&& docker-compose stop \
 	&& docker-compose rm -f \
@@ -78,19 +84,19 @@ rm_volumes:
 
 rm_hard: stop_rm rm_volumes
 
-deploy:
+up:
 	docker-compose -f ${COMPOSE_FILE} up --scale initial-data=0
 
 rm_image_test:
 	docker image rm -f ${REPO}:`git rev-parse --abbrev-ref HEAD`_test
 
-build_local:
-	docker build -t panda:`git rev-parse --abbrev-ref HEAD` -f compose/local/django/Dockerfile .
+build_local: tagged_django_image
+	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD` -f compose/local/django/Dockerfile .
 
-build_test:
+build_test: tagged_django_image
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 
-build_test_hard: rm_image_test
+build_test_hard: tagged_django_image rm_image_test
 	docker build -t ${REPO}:`git rev-parse --abbrev-ref HEAD`_test -f ${DOCKER_FILE_TEST} .
 
 deploy_build:

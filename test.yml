@@ -2,7 +2,7 @@ version: '3'
 
 services:
   django: &django
-    image: shevchenkoigor/panda:PANDA-4_test
+    image: shevchenkoigor/panda:PANDA-3_test
     restart: on-failure
     depends_on:
       - postgres
@@ -32,7 +32,7 @@ services:
 
   celeryworker:
     <<: *django
-    image: shevchenkoigor/panda:PANDA-4_test
+    image: shevchenkoigor/panda:PANDA-3_test
     depends_on:
       - redis
       - postgres
@@ -42,7 +42,7 @@ services:
 
   celerybeat:
     <<: *django
-    image: shevchenkoigor/panda:PANDA-4_test
+    image: shevchenkoigor/panda:PANDA-3_test
     depends_on:
       - redis
       - postgres
@@ -52,7 +52,7 @@ services:
 
   flower:
     <<: *django
-    image: shevchenkoigor/panda:PANDA-4_test
+    image: shevchenkoigor/panda:PANDA-3_test
     command: /start-flower
 
   node:
